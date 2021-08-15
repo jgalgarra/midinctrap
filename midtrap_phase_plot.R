@@ -1,4 +1,13 @@
 # Script to generate all magnitudes
+# 
+# List lcriteria allows to choose GDP, GNI or both
+#
+# Author: Javier Garcia-Algarra
+# August 2021
+# 
+# Inputs:  data/GDP2010_WB.csv    GNIS.csv
+# Results: data/all_speeds_criteria.csv
+#          figs/countries
 
 library(ggplot2)
 library(cowplot)
@@ -6,41 +15,41 @@ library(patchwork)
 library(zoo)
 
 
-lcriterio <- c("GDP","GNI")
-lcriterio <- c("GNI")
+lcriteria <- c("GDP","GNI")
+lcriteria <- c("GNI")
 lcountry <- c("Brazil","Chile","China","Colombia","Mexico","Morocco","Malaysia","Korea, Rep.","Puerto Rico",
               "Nigeria","Vietnam","Peru","Bulgaria", "Thailand", "Paraguay","Bolivia","Lebanon",
               "India","Argentina","Pakistan","Philippines","Indonesia","Turkey","Ecuador","Guatemala","France","Italy",
               "South Africa","Uruguay","Botswana","Costa Rica","Panama","Nicaragua","El Salvador","Portugal","Spain")
 #lcountry <- c("Poland","Romania","Bulgaria","Hungary","Belarus","Serbia")
 
-
+criteria <- read.table("criteria.txt")
+lcriteria <- criteria$V1
 
 countries_msci <- read.csv("data/countries_msci.csv")
 lcountrycode <- countries_msci$ISOCode
 
-#lcountrycode <- c("GRC")
+#lcountrycode <- c("ARG")   # Pick one country to test
 
 USA_perc_middle <- 0.3
 gap_widening <- -0.7
 mmovper <- 5
 print_indiv <- TRUE      # Print individual files
 last_year_Ecihengreen <- 2013
-tdir <- "figs"
-if (!dir.exists(tdir))
-  dir.create(tdir)
+tdir1 <- "figs"
+tdir2 <- paste0(tdir1,"/countries")
+if (!dir.exists(tdir2))
+  dir.create(tdir1)
+  dir.create(tdir2)
 
-euclidean <- function(a, b) sqrt(sum((a - b)^2))
-
-
-for (criterio in lcriterio)
+for (criteria in lcriteria)
 {
   count_countries <- 0  
   for (countrycode in lcountrycode)
   {
     count_countries <- count_countries + 1
-    print(paste(countrycode,criterio))
-    if (criterio == "GNI"){
+    print(paste(countrycode,criteria))
+    if (criteria == "GNI"){
       DATA_WB <- read.csv("data/GNIS.csv")
     } else
       DATA_WB <- read.delim2("data/GDP2010_WB.csv")
@@ -76,7 +85,7 @@ for (criterio in lcriterio)
     
     for (j in 2:nrow(datos_pais))
       datos_pais$dratio_dt2_mmov[j] <- (datos_pais$dratio_dt_mmov[j] - datos_pais$dratio_dt_mmov[j-1])
-    # Criterio Eichengreen
+    # criteria Eichengreen
     for (j in period_calc:nrow(datos_pais))
       datos_pais$gb[j] <- sum(datos_pais$growth[(j-(period_calc-1)):j])/period_calc
     for (j in 1:(nrow(datos_pais)-period_calc))
@@ -84,7 +93,7 @@ for (criterio in lcriterio)
     for (j in 1:nrow(datos_pais))
       datos_pais$dif[j] <- datos_pais$ga[j]-datos_pais$gb[j]
     datosplot <- datos_pais[period_calc:(nrow(datos_pais)-period_calc),]
-    datosplot$trap = FALSE
+    datosplot$Trapped = FALSE
     mingb = 3.5
     mindif = -2
     minMagnitude = 5000
@@ -92,10 +101,10 @@ for (criterio in lcriterio)
     datosplot$gb = (floor(datosplot$gb* 10)+1)/10
     datosplot$dif = (floor(datosplot$dif* 10)+1)/10
     for (k in 1:nrow(datosplot)){
-      datosplot$trap[k] = (datosplot$Magnitude[k]>minMagnitude) & (datosplot$gb[k]>=mingb) & (datosplot$dif[k] <= mindif)
+      datosplot$Trapped[k] = (datosplot$Magnitude[k]>minMagnitude) & (datosplot$gb[k]>=mingb) & (datosplot$dif[k] <= mindif)
     }
-    pEichen <- ggplot(data= datosplot, aes(x=Year,y=dif,color=trap))+
-         geom_point(size=2)+ylab(paste("Dif Eichengreen",criterio))+
+    pEichen <- ggplot(data= datosplot, aes(x=Year,y=dif,color=Trapped))+
+         geom_point(size=2)+ylab(paste("Dif Eichengreen",criteria))+
          scale_color_discrete(limits = c('TRUE', 'FALSE'))+
          xlim(limityears)+theme_bw()+theme(legend.position="top")
     
@@ -103,11 +112,11 @@ for (criterio in lcriterio)
                               (datos_pais$Year<last_year_Ecihengreen),]
     datosEich <- datos_pais 
     pClosingGapSpeed <- ggplot(data= datosEich, aes(x=Year,y=-dratio_dt_mmov))+
-      geom_point(size=2,col="black",alpha=0.5)+ylab(paste("Convergence speed",criterio))+
+      geom_point(size=2,col="black",alpha=0.5)+ylab(paste("Convergence speed",criteria))+
       xlim(limityears)+theme_bw()
     
     pratio <- ggplot(data= datosEich, aes(x=Year,y=ratio))+
-      geom_point(size=2,col="black",alpha=0.5)+ylab(paste("Ratio",criterio))+
+      geom_point(size=2,col="black",alpha=0.5)+ylab(paste("Ratio",criteria))+
       xlim(limityears)+theme_bw()
     
     pizda <- plot_grid(
@@ -119,26 +128,34 @@ for (criterio in lcriterio)
     datos_pais$CountryCode = rawdata$Country.Code[1]
     if (print_indiv){
       ppi <- 300
-      png(paste0(tdir,"/",country,"_",criterio,"_",mmovper,".png"), width=12*ppi, height=7*ppi, res=ppi)
+      nfile <- paste0(tdir,"/ALL_",country,"_",criteria,"_",mmovper)
+      png(paste0(nfile,".png"), width=12*ppi, height=7*ppi, res=ppi)
 
       my_breaks <- c(100,500,1000,2500,5000,10000,20000,50000)
+      my_breaks <- c(100,500,5000,50000)
       datos_speed <- datos_pais[!is.na(datos_pais$dratio_dt_mmov),]
       pratiospeed <- ggplot(data=datos_speed) +
         geom_path(
           aes(y = -dratio_dt_mmov, x = ratio, colour=Magnitude),alpha=0.5,size = 1)+
-        geom_point(aes(y = -dratio_dt_mmov, x = ratio, colour=Magnitude),size=1.5,
+        geom_point(aes(y = -dratio_dt_mmov, x = ratio, colour=Magnitude),size=2,
                  alpha=1) +
-        scale_color_gradientn(name=criterio,colours=c("violet","blue","green","yellow","orange","red"),trans="log",
+        scale_color_gradientn(name=criteria,colours=c("violet","blue","green","yellow","orange","red"),trans="log",
                                                       breaks = my_breaks, labels = my_breaks,limits=c(100,100000))+
         geom_hline(yintercept=gap_widening, color="red",linetype = "dotted",size=0.3) +
         geom_vline(xintercept=USA_perc_middle, color="red",linetype = "dotted",size=0.3) +
-        geom_text(data=subset(datos_speed,(Year%%5 == 0) | (Year==max(Year)) | (Year==min(Year))),
-                    aes(label=Year,y = -dratio_dt_mmov, x = ratio, vjust=0, hjust=-0.3),
-                    size=2.5 ,color="black") + 
+        geom_text_repel(data=subset(datos_speed,(Year%%5 == 0) | (Year==max(Year)) | (Year==min(Year))),
+                    aes(label=Year,y = -dratio_dt_mmov, x = ratio, vjust=0.1),
+                    size=4 ,color="black") + 
         scale_x_log10()+
-        ylab("Convergence speed") +
+        ylab("Convergence speed") + xlab(paste(criteria,"ratio"))+
         theme_bw()+theme(panel.grid.minor = element_blank(),
-                         panel.grid.major = element_line(size = 0.3,linetype = "dashed"))
+                         panel.grid.major = element_line(size = 0.3,linetype = "dashed"),
+                         legend.title = element_text(face="bold", size=15),
+                         legend.text = element_text( size=11),
+                         axis.text.y = element_text(face="bold", size=14),
+                         axis.text.x = element_text(face="bold", size=14),
+                         axis.title.x = element_text(face="bold", size=16),
+                         axis.title.y  = element_text(face="bold", size=16))
 
 
       pacc <- ggplot(data=datos_pais) +
@@ -161,8 +178,24 @@ for (criterio in lcriterio)
       todo <- plot_grid(
         pizda,pratiospeed,
         ncol = 2
-        )+plot_annotation(title = paste(country,criterio))
+        )+plot_annotation(title = paste(country,criteria))
       print(todo)
+      dev.off()
+      
+      
+      nfile <- paste0(tdir,"/PHASE_",country,"_",criteria,"_",mmovper)
+      png(paste0(nfile,".png"), width=8*ppi, height=7*ppi, res=ppi)
+      print(pratiospeed)
+      dev.off()
+      
+      nfile <- paste0(tdir,"/TIMELINE_",country,"_",criteria,"_",mmovper)
+      png(paste0(nfile,".png"), width=7*ppi, height=10*ppi, res=ppi)
+      ptimes <- plot_grid(
+        pEichen, pClosingGapSpeed, pratio,labels=c("A","B","C"),
+        label_size = 16,
+        ncol = 1
+      )
+      print(ptimes)
       dev.off()
     }
     if (count_countries == 1)
@@ -186,7 +219,7 @@ for (criterio in lcriterio)
   }
   
   datos_total <- subset(datos_all,select=-c(ga,gb))
-  write.csv(datos_total,paste0("data/all_speeds_",criterio,".csv"),row.names = FALSE)
+  write.csv(datos_total,paste0("data/all_speeds_",criteria,".csv"),row.names = FALSE)
 
   
 }
