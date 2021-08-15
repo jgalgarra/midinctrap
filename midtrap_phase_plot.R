@@ -10,18 +10,15 @@
 #          figs/countries
 
 library(ggplot2)
+library(ggrepel)
 library(cowplot)
 library(patchwork)
 library(zoo)
 
-
-lcriteria <- c("GDP","GNI")
-lcriteria <- c("GNI")
 lcountry <- c("Brazil","Chile","China","Colombia","Mexico","Morocco","Malaysia","Korea, Rep.","Puerto Rico",
               "Nigeria","Vietnam","Peru","Bulgaria", "Thailand", "Paraguay","Bolivia","Lebanon",
               "India","Argentina","Pakistan","Philippines","Indonesia","Turkey","Ecuador","Guatemala","France","Italy",
               "South Africa","Uruguay","Botswana","Costa Rica","Panama","Nicaragua","El Salvador","Portugal","Spain")
-#lcountry <- c("Poland","Romania","Bulgaria","Hungary","Belarus","Serbia")
 
 criteria <- read.table("criteria.txt")
 lcriteria <- criteria$V1
@@ -29,7 +26,7 @@ lcriteria <- criteria$V1
 countries_msci <- read.csv("data/countries_msci.csv")
 lcountrycode <- countries_msci$ISOCode
 
-#lcountrycode <- c("ARG")   # Pick one country to test
+lcountrycode <- c("ZAF")   # Pick one country to test
 
 USA_perc_middle <- 0.3
 gap_widening <- -0.7
@@ -37,10 +34,10 @@ mmovper <- 5
 print_indiv <- TRUE      # Print individual files
 last_year_Ecihengreen <- 2013
 tdir1 <- "figs"
-tdir2 <- paste0(tdir1,"/countries")
-if (!dir.exists(tdir2))
+tdir <- paste0(tdir1,"/countries")
+if (!dir.exists(tdir))
   dir.create(tdir1)
-  dir.create(tdir2)
+  dir.create(tdir)
 
 for (criteria in lcriteria)
 {
@@ -104,20 +101,35 @@ for (criteria in lcriteria)
       datosplot$Trapped[k] = (datosplot$Magnitude[k]>minMagnitude) & (datosplot$gb[k]>=mingb) & (datosplot$dif[k] <= mindif)
     }
     pEichen <- ggplot(data= datosplot, aes(x=Year,y=dif,color=Trapped))+
-         geom_point(size=2)+ylab(paste("Dif Eichengreen",criteria))+
+         geom_point(size=2)+ylab(paste("Dif Eichengreen"))+xlab("")+
          scale_color_discrete(limits = c('TRUE', 'FALSE'))+
-         xlim(limityears)+theme_bw()+theme(legend.position="top")
+         xlim(limityears)+theme_bw()+ 
+         theme(legend.position="top",
+               legend.title = element_text(face="bold", size=12),
+               legend.text = element_text( size=12),
+            axis.text.y = element_text(face="bold", size=12),
+            axis.text.x = element_text(face="bold", size=12),
+            axis.title.x = element_text(face="bold", size=14),
+            axis.title.y  = element_text(face="bold", size=14))
     
     datosEich <- datos_pais[(datos_pais$Year >= min(datosplot$Year))&
                               (datos_pais$Year<last_year_Ecihengreen),]
     datosEich <- datos_pais 
     pClosingGapSpeed <- ggplot(data= datosEich, aes(x=Year,y=-dratio_dt_mmov))+
-      geom_point(size=2,col="black",alpha=0.5)+ylab(paste("Convergence speed",criteria))+
-      xlim(limityears)+theme_bw()
+      geom_point(size=2,col="black",alpha=0.5)+ylab(paste("Convergence speed"))+
+      xlim(limityears)+theme_bw()+ xlab("")+
+      theme(axis.text.y = element_text(face="bold", size=12),
+            axis.text.x = element_text(face="bold", size=12),
+            axis.title.x = element_text(face="bold", size=14),
+            axis.title.y  = element_text(face="bold", size=14))
     
     pratio <- ggplot(data= datosEich, aes(x=Year,y=ratio))+
-      geom_point(size=2,col="black",alpha=0.5)+ylab(paste("Ratio",criteria))+
-      xlim(limityears)+theme_bw()
+      geom_point(size=2,col="black",alpha=0.5)+ylab(paste("Ratio"))+
+      xlim(limityears)+theme_bw() + xlab("")+
+      theme(axis.text.y = element_text(face="bold", size=12),
+                                axis.text.x = element_text(face="bold", size=12),
+                                axis.title.x = element_text(face="bold", size=14),
+                                axis.title.y  = element_text(face="bold", size=14))
     
     pizda <- plot_grid(
       pEichen, pClosingGapSpeed, pratio,
@@ -136,10 +148,11 @@ for (criteria in lcriteria)
       datos_speed <- datos_pais[!is.na(datos_pais$dratio_dt_mmov),]
       pratiospeed <- ggplot(data=datos_speed) +
         geom_path(
-          aes(y = -dratio_dt_mmov, x = ratio, colour=Magnitude),alpha=0.5,size = 1)+
+          aes(y = -dratio_dt_mmov, x = ratio, colour=Magnitude),alpha=0.3,size = 0.5,
+          arrow = arrow(length = unit(0.2, "cm"),type="closed"))+
         geom_point(aes(y = -dratio_dt_mmov, x = ratio, colour=Magnitude),size=2,
                  alpha=1) +
-        scale_color_gradientn(name=criteria,colours=c("violet","blue","green","yellow","orange","red"),trans="log",
+        scale_color_gradientn(name=criteria,colours=c("violet","blue","green","orange","red"),trans="log",
                                                       breaks = my_breaks, labels = my_breaks,limits=c(100,100000))+
         geom_hline(yintercept=gap_widening, color="red",linetype = "dotted",size=0.3) +
         geom_vline(xintercept=USA_perc_middle, color="red",linetype = "dotted",size=0.3) +
@@ -156,8 +169,6 @@ for (criteria in lcriteria)
                          axis.text.x = element_text(face="bold", size=14),
                          axis.title.x = element_text(face="bold", size=16),
                          axis.title.y  = element_text(face="bold", size=16))
-
-
       pacc <- ggplot(data=datos_pais) +
         geom_path(
           aes(y = -dratio_dt2_mmov, x = -dratio_dt_mmov),color="blue",alpha=0.3,
@@ -170,7 +181,6 @@ for (criteria in lcriteria)
         theme_bw()+theme(legend.position="bottom",
                          panel.grid.minor = element_blank(),
                          panel.grid.major = element_line(size = 0.25))
-      
       pdcha <- plot_grid(
         pratiospeed, pacc,
         ncol = 1
@@ -178,10 +188,10 @@ for (criteria in lcriteria)
       todo <- plot_grid(
         pizda,pratiospeed,
         ncol = 2
-        )+plot_annotation(title = paste(country,criteria))
+        )+plot_annotation(title = paste(country,criteria),
+                          theme = theme(plot.title = element_text(size = 18)))
       print(todo)
       dev.off()
-      
       
       nfile <- paste0(tdir,"/PHASE_",country,"_",criteria,"_",mmovper)
       png(paste0(nfile,".png"), width=8*ppi, height=7*ppi, res=ppi)
@@ -189,7 +199,7 @@ for (criteria in lcriteria)
       dev.off()
       
       nfile <- paste0(tdir,"/TIMELINE_",country,"_",criteria,"_",mmovper)
-      png(paste0(nfile,".png"), width=7*ppi, height=10*ppi, res=ppi)
+      png(paste0(nfile,".png"), width=7*ppi, height=11*ppi, res=ppi)
       ptimes <- plot_grid(
         pEichen, pClosingGapSpeed, pratio,labels=c("A","B","C"),
         label_size = 16,
