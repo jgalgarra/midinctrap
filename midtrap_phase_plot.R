@@ -26,7 +26,7 @@ lcriteria <- criteria$V1
 countries_msci <- read.csv("data/countries_msci.csv")
 lcountrycode <- countries_msci$ISOCode
 
-lcountrycode <- c("ZAF")   # Pick one country to test
+lcountrycode <- c("ARG")   # Pick one country to test
 
 USA_perc_middle <- 0.3
 gap_widening <- -0.7
@@ -157,9 +157,9 @@ for (criteria in lcriteria)
         geom_hline(yintercept=gap_widening, color="red",linetype = "dotted",size=0.3) +
         geom_vline(xintercept=USA_perc_middle, color="red",linetype = "dotted",size=0.3) +
         geom_text_repel(data=subset(datos_speed,(Year%%5 == 0) | (Year==max(Year)) | (Year==min(Year))),
-                    aes(label=Year,y = -dratio_dt_mmov, x = ratio, vjust=0.1),
-                    size=4 ,color="black") + 
-        scale_x_log10()+
+                    aes(label=Year,y = -dratio_dt_mmov, x = ratio, hjust=1,vjust=0.1),
+                    size=3.5 ,color="black") + 
+        scale_x_sqrt(breaks = c(0.01, 0.1, 0.3, 0.5,1))+
         ylab("Convergence speed") + xlab(paste(criteria,"ratio"))+
         theme_bw()+theme(panel.grid.minor = element_blank(),
                          panel.grid.major = element_line(size = 0.3,linetype = "dashed"),
@@ -199,7 +199,7 @@ for (criteria in lcriteria)
       dev.off()
       
       nfile <- paste0(tdir,"/TIMELINE_",country,"_",criteria,"_",mmovper)
-      png(paste0(nfile,".png"), width=7*ppi, height=11*ppi, res=ppi)
+      png(paste0(nfile,".png"), width=7*ppi, height=10*ppi, res=ppi)
       ptimes <- plot_grid(
         pEichen, pClosingGapSpeed, pratio,labels=c("A","B","C"),
         label_size = 16,
@@ -229,7 +229,8 @@ for (criteria in lcriteria)
   }
   
   datos_total <- subset(datos_all,select=-c(ga,gb))
-  write.csv(datos_total,paste0("data/all_speeds_",criteria,".csv"),row.names = FALSE)
+  if (length(lcountry)>5)  # to avoid accidental overwriting when testing with a short list
+     write.csv(datos_total,paste0("data/all_speeds_",criteria,".csv"),row.names = FALSE)
 
   
 }
