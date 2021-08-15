@@ -1,11 +1,20 @@
-# Script to plotaverage convergence speed and ratios
+# Script to plot average convergence speed and ratios of all countries
+# List lcriteria allows to choose GDP, GNI or both
+#
+# Author: Javier Garcia-Algarra
+# August 2021
+# 
+# Inputs:  data/countires_msci.csv
+#          data/all_speeds_criteria.csv"
+# Results: results/ALL_DISTANCES.png Errors by model
+
 
 library(ggplot2)
 library(cowplot)
 library(factoextra)
 
-lcriterio <- c("GDP","GNI")
-lcriterio <- c("GNI")
+criteria <- read.table("criteria.txt", quote="\"", comment.char="")
+lcriteria <- criteria$V1
 
 tdir <- "figs"
 if (!dir.exists(tdir))
@@ -26,9 +35,9 @@ speed_labels = c(-0.5,0,0.5,1,1.5)
 
 onlyMSCI <- TRUE
 
-for (criterio in lcriterio)
+for (criteria in lcriteria)
 {
-  datos_all <- read.csv(paste0("data/all_speeds_",criterio,".csv"))
+  datos_all <- read.csv(paste0("data/all_speeds_",criteria,".csv"))
   datos_all <- datos_all[(datos_all$Year>=start_year) & (datos_all$Year<=end_year),]
 
   lp <- unique(datos_all$CountryCode)
@@ -62,7 +71,7 @@ for (criterio in lcriterio)
     scale_x_log10(breaks = ratio_breaks, labels = ratio_breaks)+
     scale_y_continuous(breaks=speed_breaks,labels=speed_labels)+
     scale_shape_manual(values=seq(21,25)) +
-    # scale_color_gradientn(name=criterio,colours=c("violet","blue","green","yellow","orange","red"),trans="log",
+    # scale_color_gradientn(name=criteria,colours=c("violet","blue","green","yellow","orange","red"),trans="log",
     #                       breaks = my_breaks, labels = my_breaks,limits=c(100,100000))+
     theme_bw()+theme(panel.grid.minor = element_blank(),
                      panel.grid.major = element_line(size=0.4,linetype = 3, color="ivory3"),
