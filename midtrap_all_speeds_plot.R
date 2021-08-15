@@ -10,10 +10,12 @@
 
 
 library(ggplot2)
+library(ggrepel)
 library(cowplot)
 library(factoextra)
+library(Rcpp)
 
-criteria <- read.table("criteria.txt", quote="\"", comment.char="")
+criteria <- read.table("criteria.txt")
 lcriteria <- criteria$V1
 
 tdir <- "figs"
@@ -37,24 +39,25 @@ onlyMSCI <- TRUE
 
 for (criteria in lcriteria)
 {
+  print(criteria)
   datos_all <- read.csv(paste0("data/all_speeds_",criteria,".csv"))
   datos_all <- datos_all[(datos_all$Year>=start_year) & (datos_all$Year<=end_year),]
 
   lp <- unique(datos_all$CountryCode)
   #lp <- lp[!is.element(lp,lexclude)]
-  datadist <- data.frame("Country"=c(),"CountryCode"=c(),"Region"=c(),"MCSI Class" = c(),"distX"=c(),"distY"=c())
+  datadist <- data.frame("Country"=c(),"CountryCode"=c(),"Region"=c(),"MSCI Class" = c(),"distX"=c(),"distY"=c())
   for (k in lp){
     clean_data <- datos_all[(datos_all$CountryCode == k) & !is.na(datos_all$ratio) & 
                             !is.na(datos_all$dratio_dt_mmov),]
     datosx <- datos_all[(datos_all$CountryCode == k) & !is.na(datos_all$ratio),]$ratio
     print(paste(k,"number of values",length(datosx)))
     datosy <- datos_all[(datos_all$Country == k) & !is.na(datos_all$dratio_dt_mmov),]$dratio_dt_mmov
-    datos_MCSI <- countries_msci[countries_msci$ISOCode == k,]
+    datos_MSCI <- countries_msci[countries_msci$ISOCode == k,]
     # Only if the series has more than 25 values and is not a rich country
     if ((length(datosx)>30) & (max(clean_data$ratio)<max(ratio_breaks)))
-      if ((onlyMSCI) & (datos_MCSI$Category != "None"))
-      datadist <- rbind(datadist,data.frame("Country"=k,"CountryCode"= clean_data$CountryCode[1],"Region"=datos_MCSI$Region,
-                                            "MCSI Class"= datos_MCSI$Category, "distX"=mean(clean_data$ratio),
+      if ((onlyMSCI) & (datos_MSCI$Category != "None"))
+      datadist <- rbind(datadist,data.frame("Country"=k,"CountryCode"= clean_data$CountryCode[1],"Region"=datos_MSCI$Region,
+                                            "MSCI Class"= datos_MSCI$Category, "distX"=mean(clean_data$ratio),
                                             "distY"=mean(clean_data$dratio_dt_mmov)))
     
   }
@@ -64,26 +67,37 @@ for (criteria in lcriteria)
   for (m in 1:nrow(datadist))
     datadist$Magnitude[m] <- mean(datos_all[datos_all$CountryCode==datadist$CountryCode[m],]$Magnitude,na.rm=TRUE)
   distp <- ggplot(data=datadist) + 
-    geom_point(aes(y = distYtrans, x = distX, shape=MCSI.Class, fill=Region, color=Region), alpha=0.5,size=3.5)+
-    geom_text(data=datadist,
-             aes(label=CountryCode,y = distYtrans, x = distX, vjust=0.1+is.element(CountryCode,c("PHL","MYS","ISR","BGD","JOR")), hjust=-0.2),alpha=0.4,
-             size=4,angle=10) + xlab("Avg. ratio") + ylab ("Avg. convergence speed")+
+    geom_point(aes(y = distYtrans, x = distX, shape=MSCI.Class, fill=Region, color=Region), alpha=0.5,size=3.5)+
+    xlab(paste("Avg.",criteria,"ratio")) + ylab ("Avg. convergence speed")+
+    geom_text_repel(data=datadist,aes(label=CountryCode,y = distYtrans, x = distX),
+                    alpha=0.6,size=4)+
     scale_x_log10(breaks = ratio_breaks, labels = ratio_breaks)+
     scale_y_continuous(breaks=speed_breaks,labels=speed_labels)+
     scale_shape_manual(values=seq(21,25)) +
-    # scale_color_gradientn(name=criteria,colours=c("violet","blue","green","yellow","orange","red"),trans="log",
-    #                       breaks = my_breaks, labels = my_breaks,limits=c(100,100000))+
     theme_bw()+theme(panel.grid.minor = element_blank(),
                      panel.grid.major = element_line(size=0.4,linetype = 3, color="ivory3"),
-                     axis.text.y = element_text(face="bold", size=12),
-                     axis.text.x = element_text(face="bold", size=12),
-                     axis.title.x = element_text(face="bold", size=14),
-                     axis.title.y  = element_text(face="bold", size=14))
+                     legend.title = element_text(face="bold", size=15),
+                     legend.text = element_text( size=13),
+                     axis.text.y = element_text(face="bold", size=14),
+                     axis.text.x = element_text(face="bold", size=14),
+                     axis.title.x = element_text(face="bold", size=16),
+                     axis.title.y  = element_text(face="bold", size=16))
   
+  wplot <- 10
+  hplot <- 8.5
+  nfile <- paste0(tdir,"/ALL_DISTANCES")
   ppi <- 300
-  png(paste0(tdir,"/ALL_DISTANCES.png"), width=10*ppi, height=8.5*ppi, res=ppi)
+
+  tiff(paste0(nfile,".tiff"), width=wplot*ppi, height=hplot*ppi,res=ppi)
   print(distp)
   dev.off()
+  
+  
+  png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
+  print(distp)
+  dev.off()
+  
+
   
   datak <- datadist
   row.names(datak) <- datadist$CountryCode
