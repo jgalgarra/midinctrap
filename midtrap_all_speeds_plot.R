@@ -97,13 +97,4 @@ for (criteria in lcriteria)
   print(distp)
   dev.off()
   
-
-  
-  datak <- datadist
-  row.names(datak) <- datadist$CountryCode
-  datak <- subset(datak,select=c(distX,distY))
-  names(datak) <- c("Dim1","Dim2")
-  fviz_nbclust(datak, FUN = kmeans, method = "wss")
-  clust <- kmeans(datak, 5, iter.max = 20, nstart = 1)
-  fviz_cluster(clust, data = datak, ggtheme = theme_minimal())
 }
