@@ -20,11 +20,11 @@ if (!dir.exists(tdir))
 hop <- 20
 lstart_year <- seq(1960,2020-hop,by=hop)
 ratio_breaks <- c(0.01,0.05,0.1,0.25,0.8,1,1.1)
-
-datosdec <- data.frame("Country"=c(),"CountryCode"=c(),"distX"=c(),"distY"=c(),"PeriodStart" =c())
+ppi <- 300
 scountry <- c("China","Brazil","Argentina","Chile","Portugal","Korea, Rep.")
 for (criteria in lcriteria)
 {
+  datosdec <- data.frame("Country"=c(),"CountryCode"=c(),"distX"=c(),"distY"=c(),"PeriodStart" =c())
   datos_raw <- read.csv(paste0("data/all_speeds_",criteria,".csv"))
   lp <- unique(datos_raw$Country)
   for(start_year in lstart_year)

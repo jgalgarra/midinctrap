@@ -26,7 +26,7 @@ lcriteria <- criteria$V1
 countries_msci <- read.csv("data/countries_msci.csv")
 lcountrycode <- countries_msci$ISOCode
 
-lcountrycode <- c("ARG")   # Pick one country to test
+#lcountrycode <- c("ARG")   # Pick one country to test
 
 USA_perc_middle <- 0.3
 gap_widening <- -0.7
@@ -229,8 +229,9 @@ for (criteria in lcriteria)
   }
   
   datos_total <- subset(datos_all,select=-c(ga,gb))
-  if (length(lcountry)>5)  # to avoid accidental overwriting when testing with a short list
+  if (length(lcountry)>1)  # to avoid accidental overwriting when testing with a short list
      write.csv(datos_total,paste0("data/all_speeds_",criteria,".csv"),row.names = FALSE)
+     remove("datos_total")
 
   
 }
