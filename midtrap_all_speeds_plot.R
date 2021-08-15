@@ -6,7 +6,7 @@
 # 
 # Inputs:  data/countires_msci.csv
 #          data/all_speeds_criteria.csv"
-# Results: results/ALL_DISTANCES.png Errors by model
+# Results: results/ALL_DISTANCES.png .tiff
 
 
 library(ggplot2)
@@ -85,7 +85,7 @@ for (criteria in lcriteria)
   
   wplot <- 10
   hplot <- 8.5
-  nfile <- paste0(tdir,"/ALL_DISTANCES")
+  nfile <- paste0(tdir,"/ALL_DISTANCES_",criteria)
   ppi <- 300
 
   tiff(paste0(nfile,".tiff"), width=wplot*ppi, height=hplot*ppi,res=ppi)
