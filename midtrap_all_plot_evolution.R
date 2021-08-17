@@ -52,34 +52,34 @@ for (criteria in lcriteria)
         
       }
     }
-    datosdec <- datosdec[!is.na(datosdec$CountryCode),]
-    allp <- ggplot(data=datosdec)+ 
-            geom_point(aes(y = distY, x = distX, color=CountryCode), alpha=0.8,size=2.5)+
-            geom_path(aes(y = distY, x = distX,color=CountryCode),alpha=0.4,
-            size = 0.5, arrow = arrow(length = unit(0.3, "cm"),type="closed"))+
-            geom_text_repel(
-                            aes(label=paste0(CountryCode," ",PeriodStart,"/",PeriodStart+hop," "),
-                                y = distY, x = distX,color=CountryCode),alpha=0.8,size=4)+
-            xlab(paste(criteria,"ratio")) + ylab ("Convergence speed")+
-              theme_bw()+
-              theme(panel.grid.minor = element_blank(),
-                    panel.grid.major = element_line(size = 0.1),
-                    legend.position = "none",
-                    axis.text.y = element_text(face="bold", size=14),
-                    axis.text.x = element_text(face="bold", size=14),
-                    axis.title.x = element_text(face="bold", size=16),
-                    axis.title.y  = element_text(face="bold", size=16))
-    
-    wplot <- 7
-    hplot <- 6
-    nfile <- paste0(tdir,"/AVG_EVOLUTION_",criteria)
-    
-    tiff(paste0(nfile,".tiff"), width=wplot*ppi, height=hplot*ppi,res=ppi)
-    print(allp)
-    dev.off()
-    
-    png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
-    print(allp)
-    dev.off()
   }
+  datosdec <- datosdec[!is.na(datosdec$CountryCode),]
+  
+  allp <- ggplot(data=datosdec)+ 
+    geom_point(aes(y = distY, x = distX, color=CountryCode), alpha=0.8,size=2.5)+
+    geom_path(aes(y = distY, x = distX,color=CountryCode),alpha=0.4,
+              size = 0.5, arrow = arrow(length = unit(0.3, "cm"),type="closed"))+
+    geom_text_repel(aes(label=paste0(CountryCode," ",PeriodStart,"/",PeriodStart+hop," "),
+                        y = distY, x = distX,color=CountryCode),alpha=0.8,size=4)+
+    xlab(paste(criteria,"ratio")) + ylab ("Convergence speed")+
+    theme_bw()+
+    theme(panel.grid.minor = element_blank(),
+          panel.grid.major = element_line(size = 0.1),
+          legend.position = "none",
+          axis.text.y = element_text(face="bold", size=14),
+          axis.text.x = element_text(face="bold", size=14),
+          axis.title.x = element_text(face="bold", size=16),
+          axis.title.y  = element_text(face="bold", size=16))
+  
+  wplot <- 7
+  hplot <- 6
+  nfile <- paste0(tdir,"/AVG_EVOLUTION_",criteria)
+  
+  tiff(paste0(nfile,".tiff"), width=wplot*ppi, height=hplot*ppi,res=ppi)
+  print(allp)
+  dev.off()
+  
+  png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
+  print(allp)
+  dev.off()
 }
