@@ -6,7 +6,8 @@
 # 
 # Inputs:  data/countires_msci.csv
 #          data/all_speeds_criteria.csv"
-# Results: results/ALL_DISTANCES.png .tiff
+#          data/<countries by region for regression>.csv
+# Results: results/ALL_DISTANCES*.png .tiff
 
 
 library(ggplot2)
@@ -23,8 +24,7 @@ if (!dir.exists(tdir))
   dir.create(tdir)
 
 start_year <- 1980
-end_year <- 2020
-
+end_year <- 2019
 # lexclude <- c("Korea, Rep.","Spain","Portugal","Morocco","Italy","France")
 # lexclude <- c()
 
@@ -73,7 +73,8 @@ for (criteria in lcriteria)
     datadist$Magnitude[m] <- mean(datos_all[datos_all$CountryCode==datadist$CountryCode[m],]$Magnitude,na.rm=TRUE)
   distp <- ggplot(data=datadist) + 
     geom_point(aes(y = distYtrans, x = distX, shape=MSCI.Category, fill=Region, color=Region), alpha=0.5,size=3.5)+
-    xlab(paste("Avg.",criteria,"ratio")) + ylab ("Avg. convergence speed")+
+    xlab(paste0("Avg. ",criteria,"ratio (",start_year,"-",end_year,")"))+
+    ylab(paste0("Avg. convergence speed (",start_year,"-",end_year,")"))+
     geom_text_repel(data=datadist,aes(label=CountryCode,y = distYtrans, x = distX),
                     alpha=0.6,size=4)+
     scale_x_log10(breaks = ratio_breaks, labels = ratio_breaks)+
@@ -123,6 +124,10 @@ for (criteria in lcriteria)
     label_size = 16,
     ncol = 2
   )
+  print(todo)
+  dev.off()
+  
+  tiff(paste0(nfile,"_SIDEBYSIDE.tiff"), width=2*wplot*ppi, height=hplot*ppi,res=ppi)
   print(todo)
   dev.off()
 }
