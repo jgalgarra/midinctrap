@@ -35,7 +35,7 @@ group_LATAM <- read.csv(paste0("data/group_LATAM.csv"))
 group_AFRICA <- read.csv(paste0("data/group_AFRICA.csv"))
 group_EUROPA <- read.csv(paste0("data/group_EUROPA.csv"))
 
-ratio_breaks <- c(0.01,0.05,0.1,0.25,0.8,1,1.1)
+ratio_breaks <- c(0.01,0.05,0.1,0.25,0.8,1)
 my_breaks <- c(100,1000,10000,25000,50000)
 speed_breaks <-c(-sqrt(0.5),0,sqrt(0.5),1,sqrt(1.5))
 speed_labels <- c(-0.5,0,0.5,1,1.5)
@@ -59,7 +59,8 @@ for (criteria in lcriteria)
     datosy <- datos_all[(datos_all$Country == k) & !is.na(datos_all$dratio_dt_mmov),]$dratio_dt_mmov
     datos_MSCI <- countries_msci[countries_msci$ISOCode == k,]
     # Only if the series has more than 25 values and is not a rich country
-    if ((length(datosx)>30) & (max(clean_data$ratio)<max(ratio_breaks)))
+    #if ((length(datosx)>30) & (max(clean_data$ratio)<max(ratio_breaks)))
+    if ((length(datosx)>30) )
       if ((onlyMSCI) & (datos_MSCI$Category != "None"))
       datadist <- rbind(datadist,data.frame("Country"=k,"CountryCode"= clean_data$CountryCode[1],"Region"=datos_MSCI$Region,
                                             "MSCI Category"= datos_MSCI$Category, "distX"=mean(clean_data$ratio),
