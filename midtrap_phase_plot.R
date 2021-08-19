@@ -15,10 +15,8 @@ library(cowplot)
 library(patchwork)
 library(zoo)
 
-lcountry <- c("Brazil","Chile","China","Colombia","Mexico","Morocco","Malaysia","Korea, Rep.","Puerto Rico",
-              "Nigeria","Vietnam","Peru","Bulgaria", "Thailand", "Paraguay","Bolivia","Lebanon",
-              "India","Argentina","Pakistan","Philippines","Indonesia","Turkey","Ecuador","Guatemala","France","Italy",
-              "South Africa","Uruguay","Botswana","Costa Rica","Panama","Nicaragua","El Salvador","Portugal","Spain")
+# Function to format axis labels
+scaleFUN <- function(x) sprintf("%2.f ", x)
 
 criteria <- read.table("criteria.txt")
 lcriteria <- criteria$V1
@@ -26,10 +24,11 @@ lcriteria <- criteria$V1
 countries_msci <- read.csv("data/countries_msci.csv")
 lcountrycode <- countries_msci$ISOCode
 
-#lcountrycode <- c("ARG")   # Pick one country to test
+lcountrycode <- c("ESP")   # Pick one country to test
 
-USA_perc_middle <- 0.3
-gap_widening <- -0.7
+USA_perc_middle_GNI <- 0.3
+USA_perc_middle_GDP <- 0.5
+gap_widening <- -1
 mmovper <- 5
 print_indiv <- TRUE      # Print individual files
 last_year_Ecihengreen <- 2013
@@ -41,7 +40,11 @@ if (!dir.exists(tdir))
 
 for (criteria in lcriteria)
 {
-  count_countries <- 0  
+  count_countries <- 0
+  if (criteria == "GDP")
+    USA_perc_middle <- USA_perc_middle_GDP
+  else
+    USA_perc_middle <- USA_perc_middle_GNI
   for (countrycode in lcountrycode)
   {
     count_countries <- count_countries + 1
@@ -95,6 +98,7 @@ for (criteria in lcriteria)
     mindif = -2
     minMagnitude = 5000
     limityears <- c(1960,2020)
+    yearlabels <- seq(1960,2020,by=10) 
     datosplot$gb = (floor(datosplot$gb* 10)+1)/10
     datosplot$dif = (floor(datosplot$dif* 10)+1)/10
     for (k in 1:nrow(datosplot)){
@@ -103,7 +107,9 @@ for (criteria in lcriteria)
     pEichen <- ggplot(data= datosplot, aes(x=Year,y=dif,color=Trapped))+
          geom_point(size=2)+ylab(paste("Dif Eichengreen"))+xlab("")+
          scale_color_discrete(limits = c('TRUE', 'FALSE'))+
-         xlim(limityears)+theme_bw()+ 
+         scale_x_continuous(limits=limityears,breaks=yearlabels,labels=yearlabels)+ 
+         scale_y_continuous(labels=scaleFUN)+
+         theme_bw()+ 
          theme(legend.position="top",
                legend.title = element_text(face="bold", size=12),
                legend.text = element_text( size=12),
@@ -117,7 +123,10 @@ for (criteria in lcriteria)
     datosEich <- datos_pais 
     pClosingGapSpeed <- ggplot(data= datosEich, aes(x=Year,y=-dratio_dt_mmov))+
       geom_point(size=2,col="black",alpha=0.5)+ylab(paste("Convergence speed"))+
-      xlim(limityears)+theme_bw()+ xlab("")+
+      geom_hline(yintercept=gap_widening, color="red",linetype = "dotted",size=0.6) +
+      scale_x_continuous(limits=limityears,breaks=yearlabels,labels=yearlabels)+
+      scale_y_continuous(labels=scaleFUN)+
+      theme_bw()+ xlab("")+
       theme(axis.text.y = element_text(face="bold", size=12),
             axis.text.x = element_text(face="bold", size=12),
             axis.title.x = element_text(face="bold", size=14),
@@ -125,7 +134,8 @@ for (criteria in lcriteria)
     
     pratio <- ggplot(data= datosEich, aes(x=Year,y=ratio))+
       geom_point(size=2,col="black",alpha=0.5)+ylab(paste("Ratio"))+
-      xlim(limityears)+theme_bw() + xlab("")+
+      scale_x_continuous(limits=limityears, breaks=yearlabels,labels=yearlabels)+
+      theme_bw() + xlab("")+
       theme(axis.text.y = element_text(face="bold", size=12),
                                 axis.text.x = element_text(face="bold", size=12),
                                 axis.title.x = element_text(face="bold", size=14),
@@ -148,43 +158,29 @@ for (criteria in lcriteria)
       datos_speed <- datos_pais[!is.na(datos_pais$dratio_dt_mmov),]
       pratiospeed <- ggplot(data=datos_speed) +
         geom_path(
-          aes(y = -dratio_dt_mmov, x = ratio, colour=Magnitude),alpha=0.3,size = 0.5,
-          arrow = arrow(length = unit(0.2, "cm"),type="closed"))+
-        geom_point(aes(y = -dratio_dt_mmov, x = ratio, colour=Magnitude),size=2,
+          aes(y = -dratio_dt_mmov, x = ratio, colour=Magnitude),alpha=0.4,size = 0.6,
+          arrow = arrow(length = unit(0.25, "cm"),type="closed"))+
+        geom_point(aes(y = -dratio_dt_mmov, x = ratio, colour=Magnitude),size=2.5,
                  alpha=1) +
         scale_color_gradientn(name=criteria,colours=c("violet","blue","green","orange","red"),trans="log",
                                                       breaks = my_breaks, labels = my_breaks,limits=c(100,100000))+
         geom_hline(yintercept=gap_widening, color="red",linetype = "dotted",size=0.3) +
-        geom_vline(xintercept=USA_perc_middle, color="red",linetype = "dotted",size=0.3) +
         geom_text_repel(data=subset(datos_speed,(Year%%5 == 0) | (Year==max(Year)) | (Year==min(Year))),
-                    aes(label=Year,y = -dratio_dt_mmov, x = ratio, hjust=1,vjust=0.1),
-                    size=3.5 ,color="black") + 
-        scale_x_sqrt(breaks = c(0.01, 0.1, 0.3, 0.5,1))+
+                    aes(label=Year,y = -dratio_dt_mmov, x = ratio), 
+                    hjust=-1,vjust=-0.2, size=3.5, color= "black" ) + 
+       # scale_x_sqrt(breaks = c(0.01, 0.1, 0.3, 0.5,1))+
         ylab("Convergence speed") + xlab(paste(criteria,"ratio"))+
         theme_bw()+theme(panel.grid.minor = element_blank(),
-                         panel.grid.major = element_line(size = 0.3,linetype = "dashed"),
+                         panel.grid.major = element_line(size = 0.8,linetype = "dotted"),
                          legend.title = element_text(face="bold", size=15),
                          legend.text = element_text( size=11),
                          axis.text.y = element_text(face="bold", size=14),
                          axis.text.x = element_text(face="bold", size=14),
                          axis.title.x = element_text(face="bold", size=16),
                          axis.title.y  = element_text(face="bold", size=16))
-      pacc <- ggplot(data=datos_pais) +
-        geom_path(
-          aes(y = -dratio_dt2_mmov, x = -dratio_dt_mmov),color="blue",alpha=0.3,
-          linetype = "dotted", size = 0.5)+
-        geom_point(aes(y = -dratio_dt2_mmov, x = -dratio_dt_mmov, size=ratio),
-                   color="purple",alpha=0.2) +
-        geom_text(data=subset(datos_pais,(Year%%5 == 0)),
-                  aes(label=Year,y = -dratio_dt2_mmov, x = -dratio_dt_mmov, vjust=1, hjust=1.2),
-                  size=2,color="purple") + xlab("Gap closing speed") + ylab("Gap closing acceleration") +
-        theme_bw()+theme(legend.position="bottom",
-                         panel.grid.minor = element_blank(),
-                         panel.grid.major = element_line(size = 0.25))
-      pdcha <- plot_grid(
-        pratiospeed, pacc,
-        ncol = 1
-      )
+      if ((min(datos_speed$ratio) < 1.1*USA_perc_middle) & (max(datos_speed$ratio) > USA_perc_middle))
+         pratiospeed <- pratiospeed + geom_vline(xintercept=USA_perc_middle, color="red",linetype = "dotted",size=0.3)
+
       todo <- plot_grid(
         pizda,pratiospeed,
         ncol = 2
@@ -229,7 +225,7 @@ for (criteria in lcriteria)
   }
   
   datos_total <- subset(datos_all,select=-c(ga,gb))
-  if (length(lcountry)>1)  # to avoid accidental overwriting when testing with a short list
+  if (length(lcountrycode)>1)  # to avoid accidental overwriting when testing with a short list
      write.csv(datos_total,paste0("data/all_speeds_",criteria,".csv"),row.names = FALSE)
      remove("datos_total")
 
