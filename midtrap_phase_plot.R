@@ -27,7 +27,7 @@ lcriteria <- criteria$V1
 countries_msci <- read.csv("data/countries_msci.csv")
 lcountrycode <- countries_msci$ISOCode
 
-lcountrycode <- c("ESP")   # Pick one country to test
+#lcountrycode <- c("SWE")   # Pick one country to test
 print_indiv <- TRUE      # Print individual files
 print_tiff <- FALSE        # Produce tiff files. Be careful, each tiff file weights 24 MB!
 
@@ -179,6 +179,7 @@ for (criteria in lcriteria)
                          legend.title = element_text(face="bold", size=13),
                          legend.text = element_text( size=11),
                          legend.position = "left",
+                         plot.title = element_text(hjust = 0.5,size=16),
                          axis.text.y = element_text(face="bold", size=14),
                          axis.text.x = element_text(face="bold", size=14),
                          axis.title.x = element_text(face="bold", size=13),
@@ -189,9 +190,10 @@ for (criteria in lcriteria)
       wplot <- 13
       hplot <- 7
       nfile <- paste0(tdir,"/ALL_",country,"_",criteria,"_",mmovper)
+      prattitle <- pratiospeed+ ggtitle(country)
       png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
       todo <- plot_grid(
-        pizda,pratiospeed,labels=c(" ","D"),
+        pizda,prattitle,labels=c(" ","D"),
         label_size = 14,
         ncol = 2
         )#+plot_annotation(title = paste(country,criteria),
