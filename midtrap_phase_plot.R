@@ -213,9 +213,9 @@ for (criteria in lcriteria)
       dev.off()
       
       nfile <- paste0(tdir,"/TIMELINE_",country,"_",criteria,"_",mmovper)
-      png(paste0(nfile,".png"), width=7*ppi, height=10*ppi, res=ppi)
+      png(paste0(nfile,".png"), width=7*ppi, height=6*ppi, res=ppi)
       ptimes <- plot_grid(
-        pEichen, pClosingGapSpeed, pratio,labels=c("A","B","C"),
+        pEichen, pClosingGapSpeed+xlab("Year"), labels=c("A","B"),
         label_size = 15,
         ncol = 1
       )
