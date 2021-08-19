@@ -6,7 +6,7 @@
 # August 2021
 # 
 # set print_indiv to TRUE to procude all plots
-# set print_eps to print the ALL plot in that format
+# set print_tiff to print the ALL plot in that format
 #
 # Inputs:  data/GDP2010_WB.csv    GNIS.csv
 # Results: data/all_speeds_criteria.csv
@@ -29,7 +29,7 @@ lcountrycode <- countries_msci$ISOCode
 
 lcountrycode <- c("ESP")   # Pick one country to test
 print_indiv <- TRUE      # Print individual files
-print_eps <- FALSE        # Produce eps files. Be careful, each eps file weights 24 MB!
+print_tiff <- FALSE        # Produce tiff files. Be careful, each tiff file weights 24 MB!
 
 USA_perc_middle_GNI <- 0.3
 USA_perc_middle_GDP <- 0.5
@@ -172,11 +172,13 @@ for (criteria in lcriteria)
                     aes(label=Year,y = -dratio_dt_mmov, x = ratio), 
                     hjust=-1,vjust=-0.2, size=3.5, color= "black" ) + 
        # scale_x_sqrt(breaks = c(0.01, 0.1, 0.3, 0.5,1))+
-        ylab("Convergence speed") + xlab(paste(criteria,"ratio"))+
+        scale_y_continuous(position = "right")+
+        ylab("Convergence speed\n") + xlab(paste(criteria,"ratio"))+
         theme_bw()+theme(panel.grid.minor = element_blank(),
                          panel.grid.major = element_line(size = 0.8,linetype = "dotted"),
-                         legend.title = element_text(face="bold", size=15),
+                         legend.title = element_text(face="bold", size=13),
                          legend.text = element_text( size=11),
+                         legend.position = "left",
                          axis.text.y = element_text(face="bold", size=14),
                          axis.text.x = element_text(face="bold", size=14),
                          axis.title.x = element_text(face="bold", size=13),
@@ -197,7 +199,7 @@ for (criteria in lcriteria)
       print(todo)
       dev.off()
       
-      if (print_eps){
+      if (print_tiff){
         tiff(paste0(nfile,".tiff"), width=wplot*ppi, height=hplot*ppi,res=ppi)
         print(todo)
         dev.off()
