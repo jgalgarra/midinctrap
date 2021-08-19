@@ -5,6 +5,9 @@
 # Author: Javier Garcia-Algarra
 # August 2021
 # 
+# set print_indiv to TRUE to procude all plots
+# set print_eps to print the ALL plot in that format
+#
 # Inputs:  data/GDP2010_WB.csv    GNIS.csv
 # Results: data/all_speeds_criteria.csv
 #          figs/countries
@@ -25,12 +28,13 @@ countries_msci <- read.csv("data/countries_msci.csv")
 lcountrycode <- countries_msci$ISOCode
 
 lcountrycode <- c("ESP")   # Pick one country to test
+print_indiv <- TRUE      # Print individual files
+print_eps <- FALSE        # Produce eps files. Be careful, each eps file weights 24 MB!
 
 USA_perc_middle_GNI <- 0.3
 USA_perc_middle_GDP <- 0.5
 gap_widening <- -1
 mmovper <- 5
-print_indiv <- TRUE      # Print individual files
 last_year_Ecihengreen <- 2013
 tdir1 <- "figs"
 tdir <- paste0(tdir1,"/countries")
@@ -115,34 +119,35 @@ for (criteria in lcriteria)
                legend.text = element_text( size=12),
             axis.text.y = element_text(face="bold", size=12),
             axis.text.x = element_text(face="bold", size=12),
-            axis.title.x = element_text(face="bold", size=14),
-            axis.title.y  = element_text(face="bold", size=14))
+            axis.title.x = element_text(face="bold", size=13),
+            axis.title.y  = element_text(face="bold", size=13))
     
     datosEich <- datos_pais[(datos_pais$Year >= min(datosplot$Year))&
                               (datos_pais$Year<last_year_Ecihengreen),]
     datosEich <- datos_pais 
     pClosingGapSpeed <- ggplot(data= datosEich, aes(x=Year,y=-dratio_dt_mmov))+
-      geom_point(size=2,col="black",alpha=0.5)+ylab(paste("Convergence speed"))+
+      geom_point(size=2,col="black",alpha=0.5)+ylab(paste("Conv. speed"))+
       geom_hline(yintercept=gap_widening, color="red",linetype = "dotted",size=0.6) +
       scale_x_continuous(limits=limityears,breaks=yearlabels,labels=yearlabels)+
       scale_y_continuous(labels=scaleFUN)+
       theme_bw()+ xlab("")+
       theme(axis.text.y = element_text(face="bold", size=12),
             axis.text.x = element_text(face="bold", size=12),
-            axis.title.x = element_text(face="bold", size=14),
-            axis.title.y  = element_text(face="bold", size=14))
+            axis.title.x = element_text(face="bold", size=13),
+            axis.title.y  = element_text(face="bold", size=13))
     
     pratio <- ggplot(data= datosEich, aes(x=Year,y=ratio))+
       geom_point(size=2,col="black",alpha=0.5)+ylab(paste("Ratio"))+
       scale_x_continuous(limits=limityears, breaks=yearlabels,labels=yearlabels)+
-      theme_bw() + xlab("")+
+      theme_bw() + xlab("Year")+
       theme(axis.text.y = element_text(face="bold", size=12),
                                 axis.text.x = element_text(face="bold", size=12),
-                                axis.title.x = element_text(face="bold", size=14),
-                                axis.title.y  = element_text(face="bold", size=14))
+                                axis.title.x = element_text(face="bold", size=13),
+                                axis.title.y  = element_text(face="bold", size=13))
     
     pizda <- plot_grid(
-      pEichen, pClosingGapSpeed, pratio,
+      pEichen, pClosingGapSpeed, pratio,labels=c("A","B","C"),
+      label_size = 15,
       ncol = 1
     )
     
@@ -150,8 +155,6 @@ for (criteria in lcriteria)
     datos_pais$CountryCode = rawdata$Country.Code[1]
     if (print_indiv){
       ppi <- 300
-      nfile <- paste0(tdir,"/ALL_",country,"_",criteria,"_",mmovper)
-      png(paste0(nfile,".png"), width=12*ppi, height=7*ppi, res=ppi)
 
       my_breaks <- c(100,500,1000,2500,5000,10000,20000,50000)
       my_breaks <- c(100,500,5000,50000)
@@ -176,18 +179,29 @@ for (criteria in lcriteria)
                          legend.text = element_text( size=11),
                          axis.text.y = element_text(face="bold", size=14),
                          axis.text.x = element_text(face="bold", size=14),
-                         axis.title.x = element_text(face="bold", size=16),
-                         axis.title.y  = element_text(face="bold", size=16))
+                         axis.title.x = element_text(face="bold", size=13),
+                         axis.title.y  = element_text(face="bold", size=13))
       if ((min(datos_speed$ratio) < 1.1*USA_perc_middle) & (max(datos_speed$ratio) > USA_perc_middle))
          pratiospeed <- pratiospeed + geom_vline(xintercept=USA_perc_middle, color="red",linetype = "dotted",size=0.3)
-
+     
+      wplot <- 13
+      hplot <- 7
+      nfile <- paste0(tdir,"/ALL_",country,"_",criteria,"_",mmovper)
+      png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
       todo <- plot_grid(
-        pizda,pratiospeed,
+        pizda,pratiospeed,labels=c(" ","D"),
+        label_size = 14,
         ncol = 2
-        )+plot_annotation(title = paste(country,criteria),
-                          theme = theme(plot.title = element_text(size = 18)))
+        )#+plot_annotation(title = paste(country,criteria),
+        #                  theme = theme(plot.title = element_text(size = 18)))
       print(todo)
       dev.off()
+      
+      if (print_eps){
+        tiff(paste0(nfile,".tiff"), width=wplot*ppi, height=hplot*ppi,res=ppi)
+        print(todo)
+        dev.off()
+      }
       
       nfile <- paste0(tdir,"/PHASE_",country,"_",criteria,"_",mmovper)
       png(paste0(nfile,".png"), width=8*ppi, height=7*ppi, res=ppi)
@@ -198,7 +212,7 @@ for (criteria in lcriteria)
       png(paste0(nfile,".png"), width=7*ppi, height=10*ppi, res=ppi)
       ptimes <- plot_grid(
         pEichen, pClosingGapSpeed, pratio,labels=c("A","B","C"),
-        label_size = 16,
+        label_size = 15,
         ncol = 1
       )
       print(ptimes)
