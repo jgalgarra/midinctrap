@@ -9,6 +9,8 @@
 # set print_tiff to print the ALL plot in that format
 #
 # Inputs:  data/GDP2010_WB.csv    GNIS.csv
+#          config_data/config_plots.csv
+#          config_data/criteria.txt
 # Results: data/all_speeds_criteria.csv
 #          figs/countries
 
@@ -21,15 +23,18 @@ library(zoo)
 # Function to format axis labels
 scaleFUN <- function(x) sprintf("%2.f ", x)
 
-criteria <- read.table("criteria.txt")
+criteria <- read.table("config_data/criteria.txt")
 lcriteria <- criteria$V1
 
-countries_msci <- read.csv("data/countries_msci.csv")
-lcountrycode <- countries_msci$ISOCode
+configuration_file <- read.table("config_data/config_plots.csv", sep=";", header=TRUE)
+if (configuration_file$CountryCode == "MSCI"){           # Plot MSCI countries
+  countries_msci <- read.csv("data/countries_msci.csv")
+  lcountrycode <- countries_msci$ISOCode
+} else 
+  lcountrycode <- configuration_file$CountryCode
 
-#lcountrycode <- c("SWE")   # Pick one country to test
-print_indiv <- TRUE      # Print individual files
-print_tiff <- FALSE        # Produce tiff files. Be careful, each tiff file weights 24 MB!
+print_indiv <- configuration_file$print_indiv      # Print individual files
+print_tiff <- configuration_file$print_tiff        # Produce tiff files. Be careful, each tiff file weights 24 MB!
 
 USA_perc_middle_GNI <- 0.3
 USA_perc_middle_GDP <- 0.5
