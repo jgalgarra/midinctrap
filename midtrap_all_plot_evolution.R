@@ -10,7 +10,7 @@
 library(ggplot2)
 library(ggrepel)
 
-criteria <- read.table("criteria.txt")
+criteria <- read.table("config_data/criteria.txt")
 lcriteria <- criteria$V1
 
 tdir <- "figs"

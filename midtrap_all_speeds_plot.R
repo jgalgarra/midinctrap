@@ -16,7 +16,7 @@ library(cowplot)
 library(factoextra)
 library(Rcpp)
 
-criteria <- read.table("criteria.txt")
+criteria <- read.table("config_data/criteria.txt")
 lcriteria <- criteria$V1
 
 tdir <- "figs"
@@ -25,9 +25,6 @@ if (!dir.exists(tdir))
 
 start_year <- 1980
 end_year <- 2019
-# lexclude <- c("Korea, Rep.","Spain","Portugal","Morocco","Italy","France")
-# lexclude <- c()
-
 
 countries_msci <- read.csv("data/countries_msci.csv")
 group_ASIA <- read.csv(paste0("data/group_ASIA.csv"))
@@ -49,7 +46,6 @@ for (criteria in lcriteria)
   datos_all <- datos_all[(datos_all$Year>=start_year) & (datos_all$Year<=end_year),]
 
   lp <- unique(datos_all$CountryCode)
-  #lp <- lp[!is.element(lp,lexclude)]
   datadist <- data.frame("Country"=c(),"CountryCode"=c(),"Region"=c(),"MSCI Category" = c(),"distX"=c(),"distY"=c())
   for (k in lp){
     clean_data <- datos_all[(datos_all$CountryCode == k) & !is.na(datos_all$ratio) & 
@@ -90,14 +86,13 @@ for (criteria in lcriteria)
                      axis.title.x = element_text(face="bold", size=16),
                      axis.title.y  = element_text(face="bold", size=16))
   
-  
   # Regression group lines for selected areas
   datosreg <- datadist[is.element(datadist$CountryCode,c(group_ASIA$CountryCode,
                                                         group_LATAM$CountryCode,
                                                         group_AFRICA$CountryCode,
                                                         group_EUROPA$CountryCode)),]
   distpreg <- distp + geom_point(data=datosreg, aes(y = distYtrans, x = distX, color=Region),
-                                size=5,alpha=0.8,shape=21,stroke=1) +
+                                size=5.5,alpha=0.8,shape=21,stroke=0.7) +
               geom_smooth(data=datosreg,method=lm, 
                           aes(fill=Region,color=Region,y = distYtrans, x = distX), 
                           alpha=0.1,size=0.1)
@@ -116,6 +111,10 @@ for (criteria in lcriteria)
   dev.off()
   
   png(paste0(nfile,"_REGIONS.png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
+  print(distpreg)
+  dev.off()
+  
+  tiff(paste0(nfile,"_REGIONS.tiff"), width=wplot*ppi, height=hplot*ppi, res=ppi)
   print(distpreg)
   dev.off()
   
