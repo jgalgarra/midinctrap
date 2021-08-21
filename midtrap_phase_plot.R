@@ -178,17 +178,22 @@ for (criteria in lcriteria)
       my_breaks <- c(100,500,1000,2500,5000,10000,20000,50000)
       my_breaks <- c(100,500,5000,50000)
       datos_speed <- datos_pais[!is.na(datos_pais$dratio_dt_mmov),]
+
       pratiospeed <- ggplot(data=datos_speed) +
         geom_path(
           aes(y = dratio_dt_mmov, x = ratio, colour=Magnitude),alpha=0.4,size = 0.6,
-          arrow = arrow(length = unit(0.1, "cm"),type="closed"))+
-        geom_point(aes(y = dratio_dt_mmov, x = ratio, colour=Magnitude),size=2.5,
-                  alpha=1) +
+          arrow = arrow(length = unit(0.2, "cm"),type="closed"))+
+        geom_point(aes(y = dratio_dt_mmov, x = ratio, colour=Magnitude), size = 2.5,
+                  alpha=0.8) +
+        geom_point(data=datos_speed[1,],aes(y = dratio_dt_mmov, x = ratio, colour=Magnitude), size = 3,
+                   alpha=1,shape=23, stroke=1) +
+        geom_point(data=datos_speed[nrow(datos_speed),],aes(y = dratio_dt_mmov, x = ratio, colour=Magnitude), size = 3,
+                   alpha=1,shape=23, stroke=1) +
         scale_color_gradientn(name=criteria,colours=c("violet","blue","green","orange","red"),trans="log",
                                                       breaks = my_breaks, labels = my_breaks,limits=c(100,100000))+
        # geom_hline(yintercept=gap_widening, color="red",linetype = "dotted",size=0.3) +
-        geom_text_repel(data=subset(datos_speed,(Year%%10 == 0) | (Year==max(Year)) | (Year==min(Year))),
-                    aes(label=Year,y = dratio_dt_mmov, x = ratio), 
+        geom_text_repel(data=subset(datos_speed,(Year%%5 == 0) | (Year==max(Year)) | (Year==min(Year))),
+                    aes(label=sprintf("'%02d",Year%%100),y = dratio_dt_mmov, x = ratio), 
                     hjust=-2,vjust=-0.2, size=3.5, color= "black" ) + 
        # scale_x_sqrt(breaks = c(0.01, 0.1, 0.3, 0.5,1))+
         scale_y_continuous(position = "right")+
