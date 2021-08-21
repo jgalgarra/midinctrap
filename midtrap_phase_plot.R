@@ -212,18 +212,36 @@ for (criteria in lcriteria)
         dev.off()
       }
       
+      wplot <- 8
+      hplot <- 7
       nfile <- paste0(tdir,"/PHASE_",country,"_",criteria,"_",mmovper)
-      png(paste0(nfile,".png"), width=8*ppi, height=7*ppi, res=ppi)
-      print(pratiospeed)
+      png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
+      print(prattitle)
       dev.off()
       
+      if (print_tiff){
+        tiff(paste0(nfile,".tiff"), width=wplot*ppi, height=hplot*ppi,res=ppi)
+        print(prattitle)
+        dev.off()
+      }
+      
+      wplot <- 7
+      hplot <- 6
       nfile <- paste0(tdir,"/TIMELINE_",country,"_",criteria,"_",mmovper)
-      png(paste0(nfile,".png"), width=7*ppi, height=6*ppi, res=ppi)
+      png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
       ptimes <- plot_grid(
         pEichen, pClosingGapSpeed+xlab("Year"), labels=c("A","B"),
         label_size = 15,
         ncol = 1
-      )
+      )      
+      
+      if (print_tiff){
+        tiff(paste0(nfile,".tiff"), width=wplot*ppi, height=hplot*ppi,res=ppi)
+        print(ptimes)
+        dev.off()
+      }
+      
+      
       print(ptimes)
       dev.off()
     }

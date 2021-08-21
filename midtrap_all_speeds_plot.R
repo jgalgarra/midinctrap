@@ -51,17 +51,18 @@ for (criteria in lcriteria)
     clean_data <- datos_all[(datos_all$CountryCode == k) & !is.na(datos_all$ratio) & 
                             !is.na(datos_all$dratio_dt_mmov),]
     datosx <- datos_all[(datos_all$CountryCode == k) & !is.na(datos_all$ratio),]$ratio
-    print(paste(k,"number of values",length(datosx)))
+    #print(paste(k,"number of values",length(datosx)))
     datosy <- datos_all[(datos_all$Country == k) & !is.na(datos_all$dratio_dt_mmov),]$dratio_dt_mmov
     datos_MSCI <- countries_msci[countries_msci$ISOCode == k,]
-    # Only if the series has more than 25 values and is not a rich country
-    #if ((length(datosx)>30) & (max(clean_data$ratio)<max(ratio_breaks)))
-    if ((length(datosx)>30) )
+    if ((length(datosx)>30) ){
       if ((onlyMSCI) & (datos_MSCI$Category != "None"))
       datadist <- rbind(datadist,data.frame("Country"=k,"CountryCode"= clean_data$CountryCode[1],"Region"=datos_MSCI$Region,
                                             "MSCI Category"= datos_MSCI$Category, "distX"=mean(clean_data$ratio),
-                                            "distY"=mean(clean_data$dratio_dt_mmov)))
-    
+                                           "distY"=mean(clean_data$dratio_dt_mmov)))
+    } 
+    else
+      if ((onlyMSCI) & (datos_MSCI$Category != "None"))
+        print(paste("Excluded",k))
   }
    
   # Y transform to plot over a squared root scale
