@@ -38,9 +38,8 @@ print_tiff <- configuration_file$print_tiff        # Produce tiff files. Be care
 
 USA_perc_middle_GNI <- 0.3
 USA_perc_middle_GDP <- 0.5
-gap_widening <- -0.5
-mmovper_speed <- 5
-mmovper_acc <- 5
+gap_widening <- 0
+mmovper <- 5
 last_year_Ecihengreen <- 2013
 tdir1 <- "figs"
 tdir <- paste0(tdir1,"/countries")
@@ -77,7 +76,6 @@ for (criteria in lcriteria)
     datos_pais$ratio = 0
     datos_pais$dratio_dt = 0
     datos_pais$dratio_dt_mmov = 0
-    datos_pais$dratio_dt2 = 0
     datos_pais$dratio_dt2_mmov = 0
     period_calc = 7
     for (i in 1960:2020){
@@ -88,19 +86,15 @@ for (criteria in lcriteria)
     for (j in 2:nrow(datos_pais))
       datos_pais$growth[j] <- 100*(datos_pais$Magnitude[j] - datos_pais$Magnitude[j-1])/
                               (datos_pais$Magnitude[j-1])  # Magnitude growth
-    for (j in 2:nrow(datos_pais)){
-      datos_pais$dgrowth_dt[j] <- (datos_pais$growth[j] - datos_pais$growth[j-1])
+    for (j in 2:(nrow(datos_pais))){
+      datos_pais$dgrowth_dt[j] <- (datos_pais$growth[j+1] - datos_pais$growth[j])
       # Gap closing speed
       datos_pais$dratio_dt[j] <- 100*(datos_pais$ratio[j] - datos_pais$ratio[j-1])
-      if (j==2)
-        datos_pais$dratio_dt2[j] <- 0
-      else
-        datos_pais$dratio_dt2[j] <- datos_pais$dratio_dt[j] - datos_pais$dratio_dt[j-1]
-    }
-    datos_pais$dratio_dt_mmov <- rollmean(datos_pais$dratio_dt, mmovper_speed, fill = NA,  align = "right")
-    datos_pais$dratio_dt2_mmov<- rollmean(datos_pais$dratio_dt2, mmovper_acc, fill = NA,  align = "right")
+      }
+    datos_pais$dratio_dt_mmov <- rollmean(datos_pais$dratio_dt, mmovper, fill = NA,  align = "right")
+    #datos_pais$dratio_dt2_mmov<- rollmean(datos_pais$dratio_dt2, mmovper_acc, fill = NA,  align = "right")
     
-    for (j in 2:nrow(datos_pais))
+    for (j in 2:(nrow(datos_pais)))
       datos_pais$dratio_dt2_mmov[j] <- (datos_pais$dratio_dt_mmov[j] - datos_pais$dratio_dt_mmov[j-1])
     # criteria Eichengreen
     for (j in period_calc:nrow(datos_pais))
@@ -138,7 +132,7 @@ for (criteria in lcriteria)
     datosEich <- datos_pais[(datos_pais$Year >= min(datosplot$Year))&
                               (datos_pais$Year<last_year_Ecihengreen),]
     datosEich <- datos_pais 
-    pClosingGapSpeed <- ggplot(data= datosEich, aes(x=Year,y=dratio_dt_mmov))+
+    pconvergencespeed <- ggplot(data= datosEich, aes(x=Year,y=dratio_dt_mmov))+
       geom_point(size=2,col="black",alpha=0.5)+ylab(paste("Conv. speed"))+
       scale_x_continuous(limits=limityears,breaks=yearlabels,labels=yearlabels)+
       scale_y_continuous(labels=scaleFUN)+
@@ -171,7 +165,7 @@ for (criteria in lcriteria)
             axis.title.y  = element_text(face="bold", size=13))
     
     pizda <- plot_grid(
-      pEichen, pClosingGapSpeed, pacc,labels=c("A","B","C"),
+      pEichen, pconvergencespeed, pratio, labels=c("A","B","C"),
       label_size = 15,
       ncol = 1
     )
@@ -187,15 +181,15 @@ for (criteria in lcriteria)
       pratiospeed <- ggplot(data=datos_speed) +
         geom_path(
           aes(y = dratio_dt_mmov, x = ratio, colour=Magnitude),alpha=0.4,size = 0.6,
-          arrow = arrow(length = unit(0.25, "cm"),type="closed"))+
+          arrow = arrow(length = unit(0.1, "cm"),type="closed"))+
         geom_point(aes(y = dratio_dt_mmov, x = ratio, colour=Magnitude),size=2.5,
-                 alpha=1) +
+                  alpha=1) +
         scale_color_gradientn(name=criteria,colours=c("violet","blue","green","orange","red"),trans="log",
                                                       breaks = my_breaks, labels = my_breaks,limits=c(100,100000))+
        # geom_hline(yintercept=gap_widening, color="red",linetype = "dotted",size=0.3) +
         geom_text_repel(data=subset(datos_speed,(Year%%10 == 0) | (Year==max(Year)) | (Year==min(Year))),
                     aes(label=Year,y = dratio_dt_mmov, x = ratio), 
-                    hjust=-1,vjust=-0.2, size=3.5, color= "black" ) + 
+                    hjust=-2,vjust=-0.2, size=3.5, color= "black" ) + 
        # scale_x_sqrt(breaks = c(0.01, 0.1, 0.3, 0.5,1))+
         scale_y_continuous(position = "right")+
         ylab("Convergence speed\n") + xlab(paste(criteria,"ratio"))+
@@ -250,7 +244,7 @@ for (criteria in lcriteria)
       nfile <- paste0(tdir,"/TIMELINE_",country,"_",criteria,"_",mmovper)
       png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
       ptimes <- plot_grid(
-        pEichen, pClosingGapSpeed+xlab("Year"), labels=c("A","B"),
+        pEichen, pconvergencespeed+xlab("Year"), labels=c("A","B"),
         label_size = 15,
         ncol = 1
       )      
