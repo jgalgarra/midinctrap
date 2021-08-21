@@ -71,7 +71,7 @@ for (criteria in lcriteria)
     datadist$Magnitude[m] <- mean(datos_all[datos_all$CountryCode==datadist$CountryCode[m],]$Magnitude,na.rm=TRUE)
   distp <- ggplot(data=datadist) + 
     geom_point(aes(y = distYtrans, x = distX, shape=MSCI.Category, fill=Region, color=Region), alpha=0.5,size=3.5)+
-    xlab(paste0("Avg. ",criteria,"ratio (",start_year,"-",end_year,")"))+
+    xlab(paste0("Avg. ",criteria," ratio (",start_year,"-",end_year,")"))+
     ylab(paste0("Avg. convergence speed (",start_year,"-",end_year,")"))+
     geom_text_repel(data=datadist,aes(label=CountryCode,y = distYtrans, x = distX),
                     alpha=0.6,size=4)+
