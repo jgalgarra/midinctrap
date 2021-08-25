@@ -4,10 +4,10 @@
 # Author: Javier Garcia-Algarra
 # August 2021
 # 
-# Inputs:  data/countires_msci.csv
-#          data/all_speeds_criteria.csv"
-#          data/<countries by region for regression>.csv
-# Results: results/ALL_DISTANCES*.png .tiff
+# Inputs:  input_data/countires_msci.csv
+#          input_data/<countries by region for regression>.csv
+#          output_data/all_speeds_criteria.csv"
+# Results: figs/ALL_DISTANCES*.png .tiff
 
 
 library(ggplot2)
@@ -26,11 +26,11 @@ if (!dir.exists(tdir))
 start_year <- 1980
 end_year <- 2019
 
-countries_msci <- read.csv("data/countries_msci.csv")
-group_ASIA <- read.csv(paste0("data/group_ASIA.csv"))
-group_LATAM <- read.csv(paste0("data/group_LATAM.csv"))
-group_AFRICA <- read.csv(paste0("data/group_AFRICA.csv"))
-group_EUROPA <- read.csv(paste0("data/group_EUROPA.csv"))
+countries_msci <- read.csv("input_data/countries_msci.csv")
+group_ASIA <- read.csv(paste0("input_data/group_ASIA.csv"))
+group_LATAM <- read.csv(paste0("input_data/group_LATAM.csv"))
+group_AFRICA <- read.csv(paste0("input_data/group_AFRICA.csv"))
+group_EUROPA <- read.csv(paste0("input_data/group_EUROPA.csv"))
 
 ratio_breaks <- c(0.01,0.05,0.1,0.25,0.8,1)
 my_breaks <- c(100,1000,10000,25000,50000)
@@ -42,7 +42,7 @@ onlyMSCI <- TRUE
 for (criteria in lcriteria)
 {
   print(criteria)
-  datos_all <- read.csv(paste0("data/all_speeds_",criteria,".csv"))
+  datos_all <- read.csv(paste0("output_data/all_speeds_",criteria,".csv"))
   datos_all <- datos_all[(datos_all$Year>=start_year) & (datos_all$Year<=end_year),]
 
   lp <- unique(datos_all$CountryCode)

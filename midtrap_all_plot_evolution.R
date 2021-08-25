@@ -4,8 +4,8 @@
 # Author: Javier Garcia-Algarra
 # August 2021
 # 
-# Inputs:  data/all_speeds_criteria.csv"
-# Results: results/AVG_EVOLUTION.png .tiff
+# Inputs:  output_data/all_speeds_criteria.csv"
+# Results: figs/AVG_EVOLUTION.png .tiff
 
 library(ggplot2)
 library(ggrepel)
@@ -25,7 +25,7 @@ scountry <- c("China","Brazil","Argentina","Chile","Portugal","Korea, Rep.")
 for (criteria in lcriteria)
 {
   datosdec <- data.frame("Country"=c(),"CountryCode"=c(),"distX"=c(),"distY"=c(),"PeriodStart" =c())
-  datos_raw <- read.csv(paste0("data/all_speeds_",criteria,".csv"))
+  datos_raw <- read.csv(paste0("output_data/all_speeds_",criteria,".csv"))
   lp <- unique(datos_raw$Country)
   for(start_year in lstart_year)
   {

@@ -28,7 +28,7 @@ lcriteria <- criteria$V1
 
 configuration_file <- read.table("config_data/config_plots.csv", sep=";", header=TRUE)
 if (configuration_file$CountryCode == "MSCI"){           # Plot MSCI countries
-  countries_msci <- read.csv("data/countries_msci.csv")
+  countries_msci <- read.csv("input_data/countries_msci.csv")
   lcountrycode <- countries_msci$ISOCode
 } else 
   lcountrycode <- configuration_file$CountryCode
@@ -38,9 +38,16 @@ print_tiff <- configuration_file$print_tiff        # Produce tiff files. Be care
 
 USA_perc_middle_GNI <- 0.3
 USA_perc_middle_GDP <- 0.5
-gap_widening <- 0
+gap_widening_GDP <- -0.5
+gap_widening_GNI <- 0
 mmovper <- 5
 last_year_Ecihengreen <- 2013
+mingb_GDP <- 3.5
+mindif_GDP <- -2
+minMagnitude_GDP <- 10000
+mingb_GNI <- 3.5
+mindif_GNI <- -2
+minMagnitude_GNI <- 10000
 tdir1 <- "figs"
 tdir <- paste0(tdir1,"/countries")
 if (!dir.exists(tdir)){
@@ -51,10 +58,20 @@ if (!dir.exists(tdir)){
 for (criteria in lcriteria)
 {
   count_countries <- 0
-  if (criteria == "GDP")
+  if (criteria == "GDP"){
     USA_perc_middle <- USA_perc_middle_GDP
-  else
+    mingb <- mingb_GDP
+    mindif <- mindif_GDP
+    minMagnitude <- minMagnitude_GDP
+    gap_widening <- gap_widening_GDP
+  }
+  else {
     USA_perc_middle <- USA_perc_middle_GNI
+    mingb <- mingb_GNI
+    mindif <- mindif_GNI
+    minMagnitude <- minMagnitude_GNI
+    gap_widening <- gap_widening_GNI
+  }
   for (countrycode in lcountrycode)
   {
     count_countries <- count_countries + 1
