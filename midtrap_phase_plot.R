@@ -8,7 +8,7 @@
 # set print_indiv to TRUE to procude all plots
 # set print_tiff to print the ALL plot in that format
 #
-# Inputs:  data/GDP2010_WB.csv    GNIS.csv
+# Inputs:  input_data/GDP2010_WB.csv    GNIS.csv
 #          config_data/config_plots.csv
 #          config_data/criteria.txt
 # Results: data/all_speeds_criteria.csv
@@ -43,9 +43,10 @@ mmovper <- 5
 last_year_Ecihengreen <- 2013
 tdir1 <- "figs"
 tdir <- paste0(tdir1,"/countries")
-if (!dir.exists(tdir))
+if (!dir.exists(tdir)){
   dir.create(tdir1)
   dir.create(tdir)
+}
 
 for (criteria in lcriteria)
 {
@@ -59,18 +60,18 @@ for (criteria in lcriteria)
     count_countries <- count_countries + 1
     print(paste(countrycode,criteria))
     if (criteria == "GNI"){
-      DATA_WB <- read.csv("data/GNIS.csv")
+      DATA_WB <- read.csv("input_data/GNIS.csv")
     } else
-      DATA_WB <- read.delim2("data/GDP2010_WB.csv")
+      DATA_WB <- read.delim2("input_data/GDP2010_WB.csv")
     rawdata <- DATA_WB[DATA_WB$Country.Code==countrycode,]
     usadata <- DATA_WB[DATA_WB$Country.Name=="United States",]
     country <- DATA_WB[DATA_WB$Country.Code==countrycode,]$Country.Name
     datos_pais <- data.frame("Year"=seq(1960,2019))
     datos_pais$Magnitude = 0
     datos_pais$growth = 0
-    datos_pais$gb = 0
-    datos_pais$ga = 0
-    datos_pais$dif = 0
+    datos_pais$gb = 0      # Average growth backwards, for Eichengreen criterium
+    datos_pais$ga = 0      # Average growth forward
+    datos_pais$dif = 0     # Difference among ga and gb for Eichengreen criterium
     datos_pais$dgrowth_dt = 0
     datos_pais$USAMagnitude = 0
     datos_pais$ratio = 0
@@ -107,7 +108,7 @@ for (criteria in lcriteria)
     datosplot$Trapped = FALSE
     mingb = 3.5
     mindif = -2
-    minMagnitude = 5000
+    minMagnitude = 10000
     limityears <- c(1960,2020)
     yearlabels <- seq(1960,2020,by=10) 
     datosplot$gb = (floor(datosplot$gb* 10)+1)/10
@@ -165,7 +166,7 @@ for (criteria in lcriteria)
             axis.title.y  = element_text(face="bold", size=13))
     
     pizda <- plot_grid(
-      pEichen, pconvergencespeed, pratio, labels=c("A","B","C"),
+      pEichen, pconvergencespeed, pacc, labels=c("A","B","C"),
       label_size = 15,
       ncol = 1
     )
@@ -284,10 +285,8 @@ for (criteria in lcriteria)
                       "distY"=mean(clean_data$dratio_dt_mmov)))
   }
   
-  datos_total <- subset(datos_all,select=-c(ga,gb))
-  if (length(lcountrycode)>1)  # to avoid accidental overwriting when testing with a short list
-     write.csv(datos_total,paste0("data/all_speeds_",criteria,".csv"),row.names = FALSE)
-     remove("datos_total")
+  if (length(lcountrycode)>5)  # to avoid accidental overwriting when testing with a short list
+     write.csv(datos_all,paste0("output_data/all_speeds_",criteria,".csv"),row.names = FALSE)
+     remove("datos_all")
 
-  
 }
