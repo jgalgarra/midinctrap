@@ -38,7 +38,7 @@ print_tiff <- configuration_file$print_tiff        # Produce tiff files. Be care
 
 USA_perc_middle_GNI <- 0.3
 USA_perc_middle_GDP <- 0.5
-gap_widening_GDP <- -0.5
+gap_widening_GDP <- 0
 gap_widening_GNI <- 0
 mmovper <- 5
 last_year_Ecihengreen <- 2013
@@ -48,6 +48,7 @@ minMagnitude_GDP <- 10000
 mingb_GNI <- 3.5
 mindif_GNI <- -2
 minMagnitude_GNI <- 10000
+minconvspeed <- 0.7
 tdir1 <- "figs"
 tdir <- paste0(tdir1,"/countries")
 if (!dir.exists(tdir)){
@@ -112,6 +113,7 @@ for (criteria in lcriteria)
     datos_pais$dratio_dt_mmov <- rollmean(datos_pais$dratio_dt, mmovper, fill = NA,  align = "right")
     #datos_pais$dratio_dt2_mmov<- rollmean(datos_pais$dratio_dt2, mmovper_acc, fill = NA,  align = "right")
     
+    datos_pais$dratio_dt2_mmov[1] <- FALSE
     for (j in 2:(nrow(datos_pais)))
       datos_pais$dratio_dt2_mmov[j] <- (datos_pais$dratio_dt_mmov[j] - datos_pais$dratio_dt_mmov[j-1])
     # criteria Eichengreen
@@ -123,9 +125,6 @@ for (criteria in lcriteria)
       datos_pais$dif[j] <- datos_pais$ga[j]-datos_pais$gb[j]
     datosplot <- datos_pais[period_calc:(nrow(datos_pais)-period_calc),]
     datosplot$Trapped = FALSE
-    mingb = 3.5
-    mindif = -2
-    minMagnitude = 10000
     limityears <- c(1960,2020)
     yearlabels <- seq(1960,2020,by=10) 
     datosplot$gb = (floor(datosplot$gb* 10)+1)/10
@@ -150,12 +149,18 @@ for (criteria in lcriteria)
     datosEich <- datos_pais[(datos_pais$Year >= min(datosplot$Year))&
                               (datos_pais$Year<last_year_Ecihengreen),]
     datosEich <- datos_pais 
-    pconvergencespeed <- ggplot(data= datosEich, aes(x=Year,y=dratio_dt_mmov))+
-      geom_point(size=2,col="black",alpha=0.5)+ylab(paste("Conv. speed"))+
+    datosEich <- datosEich[!is.na(datosEich$dratio_dt2_mmov),]
+    
+    datosEich$signacc <- !((datosEich$dratio_dt2_mmov < gap_widening) & (datosEich$dratio_dt_mmov > minconvspeed))
+    #pconvergencespeed <- ggplot(data= datosEich[!is.na(datosEich$signacc),], aes(x=Year,y=dratio_dt_mmov,color=signacc))+
+    pconvergencespeed <- ggplot(data= datosEich, aes(x=Year,y=dratio_dt_mmov,color=signacc))+
+      
+     geom_point(size=2)+ylab(paste("Conv. speed"))+
       scale_x_continuous(limits=limityears,breaks=yearlabels,labels=yearlabels)+
       scale_y_continuous(labels=scaleFUN)+
       theme_bw()+ xlab("")+
-      theme(axis.text.y = element_text(face="bold", size=12),
+      theme(legend.position="none",
+            axis.text.y = element_text(face="bold", size=12),
             axis.text.x = element_text(face="bold", size=12),
             axis.title.x = element_text(face="bold", size=13),
             axis.title.y  = element_text(face="bold", size=13))
@@ -169,8 +174,7 @@ for (criteria in lcriteria)
                                 axis.title.x = element_text(face="bold", size=13),
                                 axis.title.y  = element_text(face="bold", size=13))
     
-    datosEich$signacc <- datosEich$dratio_dt2_mmov > gap_widening
-    pacc <- ggplot(data= datosEich, aes(x=Year,y=dratio_dt2_mmov,col=signacc))+
+    pacc <- ggplot(data= datosEich[!is.na(datosEich$dratio_dt_mmov),], aes(x=Year,y=dratio_dt2_mmov))+
       geom_point(size=2)+ylab(paste("Conv. accel."))+
       scale_x_continuous(limits=limityears, breaks=yearlabels,labels=yearlabels)+
       scale_y_continuous(labels=scaleFUN)+
@@ -183,7 +187,7 @@ for (criteria in lcriteria)
             axis.title.y  = element_text(face="bold", size=13))
     
     pizda <- plot_grid(
-      pEichen, pconvergencespeed, pacc, labels=c("A","B","C"),
+      pEichen, pconvergencespeed, pratio, labels=c("A","B","C"),
       label_size = 15,
       ncol = 1
     )
