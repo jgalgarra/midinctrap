@@ -29,18 +29,18 @@ phase_plot <- function(datos,xlabel="",ylabel="",xint=NA,yint=NA,
 {      
   pphase <- ggplot(data=datos) +
     geom_path(
-      aes(y = dratio_dt2_mmov, x = dratio_dt_mmov, colour=Magnitude),alpha=0.4,size = 0.6,
+      aes(y = Y, x = X, colour=Magnitude),alpha=0.4,size = 0.6,
       arrow = arrow(length = unit(0.2, "cm"),type="closed"))+
-    geom_point(aes(y = dratio_dt2_mmov, x = dratio_dt_mmov, colour=Magnitude), size = 2.5,
+    geom_point(aes(y = Y, x = X, colour=Magnitude), size = 2.5,
                alpha=0.8) +
-    geom_point(data=datos[1,],aes(y = dratio_dt2_mmov, x = dratio_dt_mmov, colour=Magnitude), size = 3,
+    geom_point(data=datos[1,],aes(y = Y, x = X, colour=Magnitude), size = 3,
                alpha=1,shape=23, stroke=1) +
-    geom_point(data=datos[nrow(datos_acc),],aes(y = dratio_dt2_mmov, x = dratio_dt_mmov, colour=Magnitude), size = 3,
+    geom_point(data=datos[nrow(datos),],aes(y = Y, x = X, colour=Magnitude), size = 3,
                alpha=1,shape=23, stroke=1) +
     scale_color_gradientn(name=criteria,colours=c("violet","blue","green","orange","red"),trans="log",
                           breaks = mbreaks, labels = mbreaks,limits=c(100,100000))+
-    geom_text_repel(data=subset(datos,(Year%%5 == 0) | (Year==max(Year)) | (Year==min(Year))),
-                    aes(label=sprintf("'%02d",Year%%100),y = dratio_dt2_mmov, x = dratio_dt_mmov),
+    geom_text_repel(data=subset(datos,(Year%%4 == 0) | (Year==max(Year)) | (Year==min(Year))),
+                    aes(label=sprintf("'%02d",Year%%100),y = Y, x = X),
                     hjust=-2,vjust=-0.2, size=3.5, color= "black" )+
     xlab(xlabel) + ylab(ylabel)+ theme_bw()+
     theme(panel.grid.minor = element_blank(),
@@ -54,9 +54,9 @@ phase_plot <- function(datos,xlabel="",ylabel="",xint=NA,yint=NA,
           axis.title.y  = element_text(face="bold", size=13),
           plot.title = element_text(hjust = 0.5,size=16))
   if (!is.na(xint))
-    pphase <- pphase + geom_vline(xintercept=minconvspeed, color="red",linetype = "dotted",size=0.3)
+    pphase <- pphase + geom_vline(xintercept=minconvspeed, color="red",linetype = "dotted",size=0.5)
   if (!is.na(yint))
-    pphase <- pphase + geom_hline(yintercept=0, color="red",linetype = "dotted",size=0.3)
+    pphase <- pphase + geom_hline(yintercept=0, color="red",linetype = "dotted",size=0.5)
   if (axisright)
     pphase <- pphase + scale_y_continuous(position = "right")
   return(pphase)
@@ -138,7 +138,7 @@ for (criteria in lcriteria)
     datos_pais$dgrowth_dt = 0
     datos_pais$USAMagnitude = 0
     datos_pais$ratio = NA
-    datos_pais$dratio_dt = 0
+    datos_pais$drat4rio_dt = 0
     datos_pais$dratio_dt_mmov = 0
     datos_pais$dratio_dt2_mmov = NA
     period_calc = 7
@@ -240,13 +240,26 @@ for (criteria in lcriteria)
     if (print_indiv){
       datos_speed <- datos_pais[!is.na(datos_pais$dratio_dt_mmov),]
       datos_acc <- datos_speed[!is.na(datos_speed$dratio_dt2_mmov),]
-
+      datos_speed$X <- datos_speed$ratio
+      datos_speed$Y <- datos_speed$dratio_dt_mmov
       pratiospeed <- phase_plot(datos_speed,xlabel=paste(criteria,"ratio\n"),ylabel="Convergence speed\n",
                         xint=NA, yint=NA,axisright = TRUE,legendpos = "left",mbreaks = my_breaks)
+      pratiospeedleft <- phase_plot(datos_speed,xlabel=paste(criteria,"ratio\n"),ylabel="Convergence speed\n",
+                                xint=NA, yint=NA,axisright = FALSE,legendpos = "none",mbreaks = my_breaks)
+      datos_acc$X <- datos_acc$dratio_dt_mmov
+      datos_acc$Y <- datos_acc$dratio_dt2_mmov
       pratioacc <- phase_plot(datos_acc,xlabel="Convergence speed\n",ylabel="Acceleration\n",
                               xint=minconvspeed, yint=0,axisright = FALSE,
-                              legendpos = "left",mbreaks = my_breaks)
+                              legendpos = "right",mbreaks = my_breaks)
   
+      
+      pphases <- plot_grid(
+        pratiospeedleft, pratioacc, labels=c("A","B"),
+        label_size = 15,
+        ncol = 2, rel_widths = c(0.47,0.53)
+      )
+      
+      
       wplot <- 13
       hplot <- 7
       nfile <- paste0(tdir,"/ALL_",country,"_",criteria,"_",mmovper)
@@ -268,7 +281,7 @@ for (criteria in lcriteria)
       
       wplot <- 8
       hplot <- 7
-      nfile <- paste0(tdir,"/PHASE_",country,"_",criteria,"_",mmovper)
+      nfile <- paste0(tdir,"/RATIOSvsSPEED_",country,"_",criteria,"_",mmovper)
       png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
       print(prattitle)
       dev.off()
@@ -282,6 +295,14 @@ for (criteria in lcriteria)
       nfile <- paste0(tdir,"/SPEEDvsACC_",country,"_",criteria,"_",mmovper)
       png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
       print(pratioacc)
+      dev.off()
+      
+      
+      wplot <- 14
+      hplot <- 6
+      nfile <- paste0(tdir,"/PHASES_",country,"_",criteria,"_",mmovper)
+      png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
+      print(pphases)
       dev.off()
       
       wplot <- 7
