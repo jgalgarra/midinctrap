@@ -25,7 +25,7 @@ scaleFUN <- function(x) sprintf("%2.1f ", x)
 
 # Function to generate a phase plot
 phase_plot <- function(datos,xlabel="",ylabel="",xint=NA,yint=NA,
-                       axisright=FALSE,legendpos="none",mbreaks=c())
+                       axisright=FALSE,legendpos="none",mbreaks=c(),pais="")
 {      
   pphase <- ggplot(data=datos) +
     geom_path(
@@ -42,7 +42,7 @@ phase_plot <- function(datos,xlabel="",ylabel="",xint=NA,yint=NA,
     geom_text_repel(data=subset(datos,(Year%%4 == 0) | (Year==max(Year)) | (Year==min(Year))),
                     aes(label=sprintf("'%02d",Year%%100),y = Y, x = X),
                     hjust=-2,vjust=-0.2, size=3.5, color= "black" )+
-    xlab(xlabel) + ylab(ylabel)+ theme_bw()+
+    xlab(paste(pais,xlabel)) + ylab(ylabel)+ theme_bw()+
     theme(panel.grid.minor = element_blank(),
           panel.grid.major = element_line(size = 0.8,linetype = "dotted"),
           legend.title = element_text(face="bold", size=13),
@@ -242,23 +242,23 @@ for (criteria in lcriteria)
       datos_acc <- datos_speed[!is.na(datos_speed$dratio_dt2_mmov),]
       datos_speed$X <- datos_speed$ratio
       datos_speed$Y <- datos_speed$dratio_dt_mmov
-      pratiospeed <- phase_plot(datos_speed,xlabel=paste(criteria,"ratio\n"),ylabel="Convergence speed\n",
+      pratiospeed <- phase_plot(datos_speed,xlabel=paste(criteria,"ratio\n"),ylabel="Convergence speed",
                         xint=NA, yint=NA,axisright = TRUE,legendpos = "left",mbreaks = my_breaks)
-      pratiospeedleft <- phase_plot(datos_speed,xlabel=paste(criteria,"ratio\n"),ylabel="Convergence speed\n",
-                                xint=NA, yint=NA,axisright = FALSE,legendpos = "none",mbreaks = my_breaks)
+      pratiospeedleft <- phase_plot(datos_speed,xlabel=paste(criteria,"ratio\n"),ylabel="Convergence speed",
+                                xint=NA, yint=NA,axisright = FALSE,legendpos = "none",
+                                mbreaks = my_breaks,pais = country)
       datos_acc$X <- datos_acc$dratio_dt_mmov
       datos_acc$Y <- datos_acc$dratio_dt2_mmov
-      pratioacc <- phase_plot(datos_acc,xlabel="Convergence speed\n",ylabel="Acceleration\n",
+      pspeedacc <- phase_plot(datos_acc,xlabel="Convergence speed\n",ylabel="Acceleration",
                               xint=minconvspeed, yint=0,axisright = FALSE,
                               legendpos = "right",mbreaks = my_breaks)
   
       
       pphases <- plot_grid(
-        pratiospeedleft, pratioacc, labels=c("A","B"),
+        pratiospeedleft, pspeedacc, labels=c("A","B"),
         label_size = 15,
         ncol = 2, rel_widths = c(0.47,0.53)
       )
-      
       
       wplot <- 13
       hplot <- 7
@@ -279,11 +279,11 @@ for (criteria in lcriteria)
         dev.off()
       }
       
-      wplot <- 8
+      wplot <- 7
       hplot <- 7
       nfile <- paste0(tdir,"/RATIOSvsSPEED_",country,"_",criteria,"_",mmovper)
       png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
-      print(prattitle)
+      print(pratiospeedleft)
       dev.off()
       
       if (print_tiff){
@@ -294,7 +294,7 @@ for (criteria in lcriteria)
       
       nfile <- paste0(tdir,"/SPEEDvsACC_",country,"_",criteria,"_",mmovper)
       png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
-      print(pratioacc)
+      print(pspeedacc)
       dev.off()
       
       
@@ -304,6 +304,12 @@ for (criteria in lcriteria)
       png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
       print(pphases)
       dev.off()
+      
+      if (print_tiff){
+        tiff(paste0(nfile,".tiff"), width=wplot*ppi, height=hplot*ppi,res=ppi)
+        print(pphases)
+        dev.off()
+      }
       
       wplot <- 7
       hplot <- 9
@@ -321,7 +327,6 @@ for (criteria in lcriteria)
         print(ptimes)
         dev.off()
       }
-      
       
       print(ptimes)
       dev.off()
