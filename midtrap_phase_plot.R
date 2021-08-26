@@ -23,6 +23,47 @@ library(zoo)
 # Function to format axis labels
 scaleFUN <- function(x) sprintf("%2.1f ", x)
 
+# Function to generate a phase plot
+phase_plot <- function(datos,xlabel="",ylabel="",xint=NA,yint=NA,
+                       axisright=FALSE,legendpos="none",mbreaks=c())
+{      
+  pphase <- ggplot(data=datos) +
+    geom_path(
+      aes(y = dratio_dt2_mmov, x = dratio_dt_mmov, colour=Magnitude),alpha=0.4,size = 0.6,
+      arrow = arrow(length = unit(0.2, "cm"),type="closed"))+
+    geom_point(aes(y = dratio_dt2_mmov, x = dratio_dt_mmov, colour=Magnitude), size = 2.5,
+               alpha=0.8) +
+    geom_point(data=datos[1,],aes(y = dratio_dt2_mmov, x = dratio_dt_mmov, colour=Magnitude), size = 3,
+               alpha=1,shape=23, stroke=1) +
+    geom_point(data=datos[nrow(datos_acc),],aes(y = dratio_dt2_mmov, x = dratio_dt_mmov, colour=Magnitude), size = 3,
+               alpha=1,shape=23, stroke=1) +
+    scale_color_gradientn(name=criteria,colours=c("violet","blue","green","orange","red"),trans="log",
+                          breaks = mbreaks, labels = mbreaks,limits=c(100,100000))+
+    geom_text_repel(data=subset(datos,(Year%%5 == 0) | (Year==max(Year)) | (Year==min(Year))),
+                    aes(label=sprintf("'%02d",Year%%100),y = dratio_dt2_mmov, x = dratio_dt_mmov),
+                    hjust=-2,vjust=-0.2, size=3.5, color= "black" )+
+    xlab(xlabel) + ylab(ylabel)+ theme_bw()+
+    theme(panel.grid.minor = element_blank(),
+          panel.grid.major = element_line(size = 0.8,linetype = "dotted"),
+          legend.title = element_text(face="bold", size=13),
+          legend.text = element_text( size=11),
+          legend.position = legendpos,
+          axis.text.y = element_text(face="bold", size=14),
+          axis.text.x = element_text(face="bold", size=14),
+          axis.title.x = element_text(face="bold", size=13),
+          axis.title.y  = element_text(face="bold", size=13),
+          plot.title = element_text(hjust = 0.5,size=16))
+  if (!is.na(xint))
+    pphase <- pphase + geom_vline(xintercept=minconvspeed, color="red",linetype = "dotted",size=0.3)
+  if (!is.na(yint))
+    pphase <- pphase + geom_hline(yintercept=0, color="red",linetype = "dotted",size=0.3)
+  if (axisright)
+    pphase <- pphase + scale_y_continuous(position = "right")
+  return(pphase)
+}
+
+
+
 criteria <- read.table("config_data/criteria.txt")
 lcriteria <- criteria$V1
 
@@ -55,6 +96,10 @@ if (!dir.exists(tdir)){
   dir.create(tdir1)
   dir.create(tdir)
 }
+ppi <- 300
+my_breaks <- c(100,500,1000,2500,5000,10000,20000,50000)
+my_breaks <- c(100,500,5000,50000)
+
 
 for (criteria in lcriteria)
 {
@@ -92,10 +137,10 @@ for (criteria in lcriteria)
     datos_pais$dif = 0     # Difference among ga and gb for Eichengreen criterium
     datos_pais$dgrowth_dt = 0
     datos_pais$USAMagnitude = 0
-    datos_pais$ratio = 0
+    datos_pais$ratio = NA
     datos_pais$dratio_dt = 0
     datos_pais$dratio_dt_mmov = 0
-    datos_pais$dratio_dt2_mmov = 0
+    datos_pais$dratio_dt2_mmov = NA
     period_calc = 7
     for (i in 1960:2020){
       datos_pais$Magnitude[i-(1960)] <- as.numeric(rawdata[,4+i-1960])
@@ -113,7 +158,6 @@ for (criteria in lcriteria)
     datos_pais$dratio_dt_mmov <- rollmean(datos_pais$dratio_dt, mmovper, fill = NA,  align = "right")
     #datos_pais$dratio_dt2_mmov<- rollmean(datos_pais$dratio_dt2, mmovper_acc, fill = NA,  align = "right")
     
-    datos_pais$dratio_dt2_mmov[1] <- FALSE
     for (j in 2:(nrow(datos_pais)))
       datos_pais$dratio_dt2_mmov[j] <- (datos_pais$dratio_dt_mmov[j] - datos_pais$dratio_dt_mmov[j-1])
     # criteria Eichengreen
@@ -149,22 +193,21 @@ for (criteria in lcriteria)
     datosEich <- datos_pais[(datos_pais$Year >= min(datosplot$Year))&
                               (datos_pais$Year<last_year_Ecihengreen),]
     datosEich <- datos_pais 
-    datosEich <- datosEich[!is.na(datosEich$dratio_dt2_mmov),]
-    
-    datosEich$signacc <- !((datosEich$dratio_dt2_mmov < gap_widening) & (datosEich$dratio_dt_mmov > minconvspeed))
-    #pconvergencespeed <- ggplot(data= datosEich[!is.na(datosEich$signacc),], aes(x=Year,y=dratio_dt_mmov,color=signacc))+
-    pconvergencespeed <- ggplot(data= datosEich, aes(x=Year,y=dratio_dt_mmov,color=signacc))+
-      
+    datosEich$signacc <- (datosEich$dratio_dt2_mmov < gap_widening) & (datosEich$dratio_dt_mmov > minconvspeed)
+    datos_speed <- datosEich[!is.na(datosEich$dratio_dt_mmov),]
+    datos_speed[is.na(datos_speed$dratio_dt2_mmov),]$signacc <- FALSE
+    pconvergencespeed <- ggplot(data= datos_speed, aes(x=Year,y=dratio_dt_mmov,color=signacc))+
      geom_point(size=2)+ylab(paste("Conv. speed"))+
       scale_x_continuous(limits=limityears,breaks=yearlabels,labels=yearlabels)+
       scale_y_continuous(labels=scaleFUN)+
+      scale_color_discrete(limits = c('TRUE', 'FALSE'))+
       theme_bw()+ xlab("")+
       theme(legend.position="none",
             axis.text.y = element_text(face="bold", size=12),
             axis.text.x = element_text(face="bold", size=12),
             axis.title.x = element_text(face="bold", size=13),
             axis.title.y  = element_text(face="bold", size=13))
-    
+
     pratio <- ggplot(data= datosEich, aes(x=Year,y=ratio))+
       geom_point(size=2,col="black",alpha=0.5)+ylab(paste("Ratio"))+
       scale_x_continuous(limits=limityears, breaks=yearlabels,labels=yearlabels)+
@@ -174,7 +217,7 @@ for (criteria in lcriteria)
                                 axis.title.x = element_text(face="bold", size=13),
                                 axis.title.y  = element_text(face="bold", size=13))
     
-    pacc <- ggplot(data= datosEich[!is.na(datosEich$dratio_dt_mmov),], aes(x=Year,y=dratio_dt2_mmov))+
+    pacc <- ggplot(data= datosEich, aes(x=Year,y=dratio_dt2_mmov))+
       geom_point(size=2)+ylab(paste("Conv. accel."))+
       scale_x_continuous(limits=limityears, breaks=yearlabels,labels=yearlabels)+
       scale_y_continuous(labels=scaleFUN)+
@@ -195,44 +238,15 @@ for (criteria in lcriteria)
     datos_pais$Country = country
     datos_pais$CountryCode = rawdata$Country.Code[1]
     if (print_indiv){
-      ppi <- 300
-
-      my_breaks <- c(100,500,1000,2500,5000,10000,20000,50000)
-      my_breaks <- c(100,500,5000,50000)
       datos_speed <- datos_pais[!is.na(datos_pais$dratio_dt_mmov),]
+      datos_acc <- datos_speed[!is.na(datos_speed$dratio_dt2_mmov),]
 
-      pratiospeed <- ggplot(data=datos_speed) +
-        geom_path(
-          aes(y = dratio_dt_mmov, x = ratio, colour=Magnitude),alpha=0.4,size = 0.6,
-          arrow = arrow(length = unit(0.2, "cm"),type="closed"))+
-        geom_point(aes(y = dratio_dt_mmov, x = ratio, colour=Magnitude), size = 2.5,
-                  alpha=0.8) +
-        geom_point(data=datos_speed[1,],aes(y = dratio_dt_mmov, x = ratio, colour=Magnitude), size = 3,
-                   alpha=1,shape=23, stroke=1) +
-        geom_point(data=datos_speed[nrow(datos_speed),],aes(y = dratio_dt_mmov, x = ratio, colour=Magnitude), size = 3,
-                   alpha=1,shape=23, stroke=1) +
-        scale_color_gradientn(name=criteria,colours=c("violet","blue","green","orange","red"),trans="log",
-                                                      breaks = my_breaks, labels = my_breaks,limits=c(100,100000))+
-       # geom_hline(yintercept=gap_widening, color="red",linetype = "dotted",size=0.3) +
-        geom_text_repel(data=subset(datos_speed,(Year%%5 == 0) | (Year==max(Year)) | (Year==min(Year))),
-                    aes(label=sprintf("'%02d",Year%%100),y = dratio_dt_mmov, x = ratio), 
-                    hjust=-2,vjust=-0.2, size=3.5, color= "black" ) + 
-       # scale_x_sqrt(breaks = c(0.01, 0.1, 0.3, 0.5,1))+
-        scale_y_continuous(position = "right")+
-        ylab("Convergence speed\n") + xlab(paste(criteria,"ratio"))+
-        theme_bw()+theme(panel.grid.minor = element_blank(),
-                         panel.grid.major = element_line(size = 0.8,linetype = "dotted"),
-                         legend.title = element_text(face="bold", size=13),
-                         legend.text = element_text( size=11),
-                         legend.position = "left",
-                         plot.title = element_text(hjust = 0.5,size=16),
-                         axis.text.y = element_text(face="bold", size=14),
-                         axis.text.x = element_text(face="bold", size=14),
-                         axis.title.x = element_text(face="bold", size=13),
-                         axis.title.y  = element_text(face="bold", size=13))
-      if ((min(datos_speed$ratio) < 1.1*USA_perc_middle) & (max(datos_speed$ratio) > USA_perc_middle))
-         pratiospeed <- pratiospeed + geom_vline(xintercept=USA_perc_middle, color="red",linetype = "dotted",size=0.3)
-     
+      pratiospeed <- phase_plot(datos_speed,xlabel=paste(criteria,"ratio\n"),ylabel="Convergence speed\n",
+                        xint=NA, yint=NA,axisright = TRUE,legendpos = "left",mbreaks = my_breaks)
+      pratioacc <- phase_plot(datos_acc,xlabel="Convergence speed\n",ylabel="Acceleration\n",
+                              xint=minconvspeed, yint=0,axisright = FALSE,
+                              legendpos = "left",mbreaks = my_breaks)
+  
       wplot <- 13
       hplot <- 7
       nfile <- paste0(tdir,"/ALL_",country,"_",criteria,"_",mmovper)
@@ -242,8 +256,7 @@ for (criteria in lcriteria)
         pizda,prattitle,labels=c(" ","D"),
         label_size = 14,
         ncol = 2
-        )#+plot_annotation(title = paste(country,criteria),
-        #                  theme = theme(plot.title = element_text(size = 18)))
+        )
       print(todo)
       dev.off()
       
@@ -266,12 +279,18 @@ for (criteria in lcriteria)
         dev.off()
       }
       
+      nfile <- paste0(tdir,"/SPEEDvsACC_",country,"_",criteria,"_",mmovper)
+      png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
+      print(pratioacc)
+      dev.off()
+      
       wplot <- 7
-      hplot <- 6
+      hplot <- 9
       nfile <- paste0(tdir,"/TIMELINE_",country,"_",criteria,"_",mmovper)
       png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
       ptimes <- plot_grid(
-        pEichen, pconvergencespeed+xlab("Year"), labels=c("A","B"),
+        pEichen, pconvergencespeed+geom_hline(yintercept=minconvspeed, color="red",linetype = "dotted",size=0.6),
+        pacc+xlab("Year"),pratio, labels=c("A","B","C"),
         label_size = 15,
         ncol = 1
       )      
