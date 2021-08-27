@@ -54,9 +54,9 @@ phase_plot <- function(datos,xlabel="",ylabel="",xint=NA,yint=NA,
           axis.title.y  = element_text(face="bold", size=13),
           plot.title = element_text(hjust = 0.5,size=16))
   if (!is.na(xint))
-    pphase <- pphase + geom_vline(xintercept=minconvspeed, color="red",linetype = "dotted",size=0.5)
+    pphase <- pphase + geom_vline(xintercept=xint, color="red",linetype = "dotted",size=0.5)
   if (!is.na(yint))
-    pphase <- pphase + geom_hline(yintercept=0, color="red",linetype = "dotted",size=0.5)
+    pphase <- pphase + geom_hline(yintercept=yint, color="red",linetype = "dotted",size=0.5)
   if (axisright)
     pphase <- pphase + scale_y_continuous(position = "right")
   return(pphase)
@@ -76,11 +76,13 @@ if (configuration_file$CountryCode == "MSCI"){           # Plot MSCI countries
 
 print_indiv <- configuration_file$print_indiv      # Print individual files
 print_tiff <- configuration_file$print_tiff        # Produce tiff files. Be careful, each tiff file weights 24 MB!
+initial_year <- configuration_file$initial_year
+final_year <- configuration_file$final_year
 
 USA_perc_middle_GNI <- 0.3
 USA_perc_middle_GDP <- 0.5
-gap_widening_GDP <- 0
-gap_widening_GNI <- 0
+minaccel_GDP <- 0
+minaccel_GNI <- -1
 mmovper <- 5
 last_year_Ecihengreen <- 2013
 mingb_GDP <- 3.5
@@ -100,8 +102,7 @@ if (!dir.exists(tdir)){
 ppi <- 300
 my_breaks <- c(100,500,1000,2500,5000,10000,20000,50000)
 my_breaks <- c(100,500,5000,50000)
-initial_year <- 1960
-final_year <- 2020
+
 
 
 for (criteria in lcriteria)
@@ -112,15 +113,15 @@ for (criteria in lcriteria)
     mingb <- mingb_GDP
     mindif <- mindif_GDP
     minMagnitude <- minMagnitude_GDP
-    gap_widening <- gap_widening_GDP
-    minconvspeed <- minconvspeed_GDP
+    minaccel <- minaccel_GDP
+    minconvspeed <- minconvspeed_GDP  
   }
   else {
     USA_perc_middle <- USA_perc_middle_GNI
     mingb <- mingb_GNI
     mindif <- mindif_GNI
     minMagnitude <- minMagnitude_GNI
-    gap_widening <- gap_widening_GNI
+    minaccel <- minaccel_GNI
     minconvspeed <- minconvspeed_GNI
   }
   for (countrycode in lcountrycode)
@@ -134,7 +135,7 @@ for (criteria in lcriteria)
     rawdata <- DATA_WB[DATA_WB$Country.Code==countrycode,]
     usadata <- DATA_WB[DATA_WB$Country.Name=="United States",]
     country <- DATA_WB[DATA_WB$Country.Code==countrycode,]$Country.Name
-    datos_pais <- data.frame("Year"=seq(initial_year,final_year-1))
+    datos_pais <- data.frame("Year"=seq(initial_year,final_year))
     datos_pais$Magnitude = 0
     datos_pais$growth = 0
     datos_pais$gb = 0      # Average growth backwards, for Eichengreen criterium
@@ -182,7 +183,7 @@ for (criteria in lcriteria)
       datosplot$Trapped[k] = (datosplot$Magnitude[k]>minMagnitude) & (datosplot$gb[k]>=mingb) & (datosplot$dif[k] <= mindif)
     }
     pEichen <- ggplot(data= datosplot, aes(x=Year,y=dif,color=Trapped))+
-         geom_point(size=2)+ylab(paste("Dif Eichengreen"))+xlab("")+
+         geom_point(size=2)+ylab(paste("Dif. Eichen (",countrycode,")"))+xlab("")+
          scale_color_discrete(limits = c('TRUE', 'FALSE'))+
          scale_x_continuous(limits=limityears,breaks=yearlabels,labels=yearlabels)+ 
          scale_y_continuous(labels=scaleFUN)+
@@ -198,20 +199,23 @@ for (criteria in lcriteria)
     datosEich <- datos_pais[(datos_pais$Year >= min(datosplot$Year))&
                               (datos_pais$Year<last_year_Ecihengreen),]
     datosEich <- datos_pais 
-    datosEich$signacc <- (datosEich$dratio_dt2_mmov < gap_widening) & (datosEich$dratio_dt_mmov > minconvspeed)
+    datosEich$signacc <- (datosEich$dratio_dt2_mmov <= minaccel) & (datosEich$dratio_dt_mmov >= minconvspeed)
     datos_speed <- datosEich[!is.na(datosEich$dratio_dt_mmov),]
     datos_speed[is.na(datos_speed$dratio_dt2_mmov),]$signacc <- FALSE
     pconvergencespeed <- ggplot(data= datos_speed, aes(x=Year,y=dratio_dt_mmov,color=signacc))+
-     geom_point(size=2)+ylab(paste("Conv. speed"))+
-      scale_x_continuous(limits=limityears,breaks=yearlabels,labels=yearlabels)+
-      scale_y_continuous(labels=scaleFUN)+
-      scale_color_discrete(limits = c('TRUE', 'FALSE'))+
-      theme_bw()+ xlab("")+labs(colour="Trapped")+
-      theme(axis.text.y = element_text(face="bold", size=12),
-            axis.text.x = element_text(face="bold", size=12),
-            axis.title.x = element_text(face="bold", size=13),
-            axis.title.y  = element_text(face="bold", size=13))
-
+                         geom_point(size=2)+ylab(paste(criteria,"Conv. speed"))+
+                         scale_x_continuous(limits=limityears,breaks=yearlabels,labels=yearlabels)+
+                         scale_y_continuous(labels=scaleFUN)+
+                         scale_color_discrete(limits = c('TRUE', 'FALSE'))+
+                         theme_bw()+ xlab("")+
+                         theme(axis.text.y = element_text(face="bold", size=12),
+                               axis.text.x = element_text(face="bold", size=12),
+                               axis.title.x = element_text(face="bold", size=13),
+                               axis.title.y  = element_text(face="bold", size=13))
+    if (criteria=="GDP")
+      pconvergencespeed <- pconvergencespeed + labs(colour="Trapped")
+    else
+      pconvergencespeed <- pconvergencespeed + labs(colour="Eichengreen-like trapped")
     pratio <- ggplot(data= datosEich, aes(x=Year,y=ratio))+
       geom_point(size=2,col="black",alpha=0.5)+ylab(paste(criteria,"Ratio"))+
       scale_x_continuous(limits=limityears, breaks=yearlabels,labels=yearlabels)+
@@ -225,7 +229,7 @@ for (criteria in lcriteria)
       geom_point(size=2)+ylab(paste("Conv. accel."))+
       scale_x_continuous(limits=limityears, breaks=yearlabels,labels=yearlabels)+
       scale_y_continuous(labels=scaleFUN)+
-      geom_hline(yintercept=gap_widening, color="red",linetype = "dotted",size=0.6) +
+      geom_hline(yintercept=minaccel, color="red",linetype = "dotted",size=0.6) +
       theme_bw() + 
       theme(legend.position = "none",
             axis.text.y = element_text(face="bold", size=12),
@@ -259,7 +263,7 @@ for (criteria in lcriteria)
       datos_acc$X <- datos_acc$dratio_dt_mmov
       datos_acc$Y <- datos_acc$dratio_dt2_mmov
       pspeedacc <- phase_plot(datos_acc,xlabel="Convergence speed",ylabel="Acceleration",
-                              xint=minconvspeed, yint=0,axisright = FALSE,
+                              xint=minconvspeed, yint=minaccel,axisright = FALSE,
                               legendpos = "right",mbreaks = my_breaks)
   
       
@@ -324,20 +328,24 @@ for (criteria in lcriteria)
         dev.off()
       }
       
-      wplot <- 7
-      hplot <- 9
+
       nfile <- paste0(tdir,"/TIMELINE_",country,"_",criteria,"_",mmovper)
-      png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
-      if (criteria == "GDP")
+      if (criteria == "GDP"){
+        hplot <- 6
+        wplot <- 6
+        png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
         ptimes <- plot_grid(
           pEichen, pconvergencespeed+
                    geom_hline(yintercept=minconvspeed, color="red",linetype = "dotted",size=0.6)+
-                   theme(legend.position="none"),
-          pacc+xlab("Year"),pratio, labels=c("A","B","C","D"),
-          label_size = 15,
+                   theme(legend.position="none")+xlab("Year"),
+          labels=c("A","B"),
+          label_size = 15,rel_heights = c(0.55,0.45),
           ncol = 1
         )
-      else
+      } else{
+        wplot <- 7
+        hplot <- 9
+        png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
         ptimes <- plot_grid(
           pconvergencespeed+
             geom_hline(yintercept=minconvspeed, color="red",linetype = "dotted",size=0.6)+
@@ -346,6 +354,7 @@ for (criteria in lcriteria)
           label_size = 15,
           ncol = 1
         )
+      }
       if (print_tiff){
         tiff(paste0(nfile,".tiff"), width=wplot*ppi, height=hplot*ppi,res=ppi)
         print(ptimes)
