@@ -68,10 +68,17 @@ criteria <- read.table("config_data/criteria.txt")
 lcriteria <- criteria$V1
 
 configuration_file <- read.table("config_data/config_plots.csv", sep=";", header=TRUE)
+print_indiv <- configuration_file$print_indiv      # Print individual files
+print_tiff <- configuration_file$print_tiff        # Produce tiff files. Be careful, each tiff file weights 24 MB!
+initial_year <- configuration_file$initial_year
+final_year <- configuration_file$final_year
+
+
 if (configuration_file$CountryCode == "MSCI"){           # Plot MSCI countries
   countries_msci <- read.csv("input_data/countries_msci.csv")
   lcountrycode <- countries_msci$ISOCode
   SecondCountryCode <- "NONE"  # For comparison plots
+  print_tiff <- FALSE          # Do not produce tiff files for the full list
 } else {
   lcountrycode <- configuration_file$CountryCode
   SecondCountryCode <- configuration_file$SecondCountryCode
@@ -79,11 +86,6 @@ if (configuration_file$CountryCode == "MSCI"){           # Plot MSCI countries
     lcountrycode <- c(lcountrycode,SecondCountryCode)
     
 }
-
-print_indiv <- configuration_file$print_indiv      # Print individual files
-print_tiff <- configuration_file$print_tiff        # Produce tiff files. Be careful, each tiff file weights 24 MB!
-initial_year <- configuration_file$initial_year
-final_year <- configuration_file$final_year
 
 USA_perc_middle_GNI <- 0.3
 USA_perc_middle_GDP <- 0.5
@@ -335,11 +337,14 @@ for (criteria in lcriteria)
       }
 
       nfile <- paste0(tdir,"/TIMELINE_",country,"_",criteria,"_",mmovper)
-      if (countrycode != SecondCountryCode){
+      if (SecondCountryCode == "NONE"){
         labs_timeline <- c("A","B")
         secondident <- ""
-      } else {        
-        labs_timeline <- c("C","D")  # For comparative side by side plots
+      } else {      
+        if (SecondCountryCode == countrycode)
+          labs_timeline <- c("C","D")  # For comparative side by side plots
+        else
+          labs_timeline <- c("A","B")
         secondident <- "SECOND"
       }
       if (criteria == "GDP"){
