@@ -100,6 +100,8 @@ if (!dir.exists(tdir)){
 ppi <- 300
 my_breaks <- c(100,500,1000,2500,5000,10000,20000,50000)
 my_breaks <- c(100,500,5000,50000)
+initial_year <- 1960
+final_year <- 2020
 
 
 for (criteria in lcriteria)
@@ -132,7 +134,7 @@ for (criteria in lcriteria)
     rawdata <- DATA_WB[DATA_WB$Country.Code==countrycode,]
     usadata <- DATA_WB[DATA_WB$Country.Name=="United States",]
     country <- DATA_WB[DATA_WB$Country.Code==countrycode,]$Country.Name
-    datos_pais <- data.frame("Year"=seq(1960,2019))
+    datos_pais <- data.frame("Year"=seq(initial_year,final_year-1))
     datos_pais$Magnitude = 0
     datos_pais$growth = 0
     datos_pais$gb = 0      # Average growth backwards, for Eichengreen criterium
@@ -145,10 +147,10 @@ for (criteria in lcriteria)
     datos_pais$dratio_dt_mmov = 0
     datos_pais$dratio_dt2_mmov = NA
     period_calc = 7
-    for (i in 1960:2020){
-      datos_pais$Magnitude[i-(1960)] <- as.numeric(rawdata[,4+i-1960])
-      datos_pais$USAMagnitude[i-(1960)] <- as.numeric(usadata[,4+i-1960]) # USA GDP or GNI
-      datos_pais$ratio[i-(1960)] <- datos_pais$Magnitude[i-(1960)]/datos_pais$USAMagnitude[i-(1960)]
+    for (i in initial_year:final_year){
+      datos_pais$Magnitude[i-(initial_year)] <- as.numeric(rawdata[,4+i-initial_year])
+      datos_pais$USAMagnitude[i-(initial_year)] <- as.numeric(usadata[,4+i-initial_year]) # USA GDP or GNI
+      datos_pais$ratio[i-(initial_year)] <- datos_pais$Magnitude[i-(initial_year)]/datos_pais$USAMagnitude[i-(initial_year)]
     }
     for (j in 2:nrow(datos_pais))
       datos_pais$growth[j] <- 100*(datos_pais$Magnitude[j] - datos_pais$Magnitude[j-1])/
@@ -172,8 +174,8 @@ for (criteria in lcriteria)
       datos_pais$dif[j] <- datos_pais$ga[j]-datos_pais$gb[j]
     datosplot <- datos_pais[period_calc:(nrow(datos_pais)-period_calc),]
     datosplot$Trapped = FALSE
-    limityears <- c(1960,2020)
-    yearlabels <- seq(1960,2020,by=10) 
+    limityears <- c(initial_year,final_year)
+    yearlabels <- seq(initial_year,final_year,by=10) 
     datosplot$gb = (floor(datosplot$gb* 10)+1)/10
     datosplot$dif = (floor(datosplot$dif* 10)+1)/10
     for (k in 1:nrow(datosplot)){
@@ -211,7 +213,7 @@ for (criteria in lcriteria)
             axis.title.y  = element_text(face="bold", size=13))
 
     pratio <- ggplot(data= datosEich, aes(x=Year,y=ratio))+
-      geom_point(size=2,col="black",alpha=0.5)+ylab(paste("Ratio"))+
+      geom_point(size=2,col="black",alpha=0.5)+ylab(paste(criteria,"Ratio"))+
       scale_x_continuous(limits=limityears, breaks=yearlabels,labels=yearlabels)+
       theme_bw() + xlab("Year")+
       theme(axis.text.y = element_text(face="bold", size=12),
@@ -224,7 +226,7 @@ for (criteria in lcriteria)
       scale_x_continuous(limits=limityears, breaks=yearlabels,labels=yearlabels)+
       scale_y_continuous(labels=scaleFUN)+
       geom_hline(yintercept=gap_widening, color="red",linetype = "dotted",size=0.6) +
-      theme_bw() + xlab("Year")+
+      theme_bw() + 
       theme(legend.position = "none",
             axis.text.y = element_text(face="bold", size=12),
             axis.text.x = element_text(face="bold", size=12),
@@ -249,7 +251,7 @@ for (criteria in lcriteria)
       datos_acc <- datos_speed[!is.na(datos_speed$dratio_dt2_mmov),]
       datos_speed$X <- datos_speed$ratio
       datos_speed$Y <- datos_speed$dratio_dt_mmov
-      pratiospeed <- phase_plot(datos_speed,xlabel=paste(criteria,"ratio"),ylabel="Convergence speed",
+      pratiospeed <- phase_plot(datos_speed,xlabel=paste(criteria,"Ratio"),ylabel="Convergence speed",
                         xint=NA, yint=NA,axisright = TRUE,legendpos = "left",mbreaks = my_breaks)
       pratiospeedleft <- phase_plot(datos_speed,xlabel=paste(criteria,"ratio"),ylabel="Convergence speed",
                                 xint=NA, yint=NA,axisright = FALSE,legendpos = "none",
