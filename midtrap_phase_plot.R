@@ -89,7 +89,8 @@ minMagnitude_GDP <- 10000
 mingb_GNI <- 3.5
 mindif_GNI <- -2
 minMagnitude_GNI <- 10000
-minconvspeed <- 0.7
+minconvspeed_GDP <- 0.7
+minconvspeed_GNI <- 2
 tdir1 <- "figs"
 tdir <- paste0(tdir1,"/countries")
 if (!dir.exists(tdir)){
@@ -110,6 +111,7 @@ for (criteria in lcriteria)
     mindif <- mindif_GDP
     minMagnitude <- minMagnitude_GDP
     gap_widening <- gap_widening_GDP
+    minconvspeed <- minconvspeed_GDP
   }
   else {
     USA_perc_middle <- USA_perc_middle_GNI
@@ -117,6 +119,7 @@ for (criteria in lcriteria)
     mindif <- mindif_GNI
     minMagnitude <- minMagnitude_GNI
     gap_widening <- gap_widening_GNI
+    minconvspeed <- minconvspeed_GNI
   }
   for (countrycode in lcountrycode)
   {
@@ -201,9 +204,8 @@ for (criteria in lcriteria)
       scale_x_continuous(limits=limityears,breaks=yearlabels,labels=yearlabels)+
       scale_y_continuous(labels=scaleFUN)+
       scale_color_discrete(limits = c('TRUE', 'FALSE'))+
-      theme_bw()+ xlab("")+
-      theme(legend.position="none",
-            axis.text.y = element_text(face="bold", size=12),
+      theme_bw()+ xlab("")+labs(colour="Trapped")+
+      theme(axis.text.y = element_text(face="bold", size=12),
             axis.text.x = element_text(face="bold", size=12),
             axis.title.x = element_text(face="bold", size=13),
             axis.title.y  = element_text(face="bold", size=13))
@@ -228,13 +230,18 @@ for (criteria in lcriteria)
             axis.text.x = element_text(face="bold", size=12),
             axis.title.x = element_text(face="bold", size=13),
             axis.title.y  = element_text(face="bold", size=13))
-    
-    pizda <- plot_grid(
-      pEichen, pconvergencespeed, pratio, labels=c("A","B","C"),
-      label_size = 15,rel_heights = c(0.38,0.31,0.31),
-      ncol = 1
-    )
-    
+    if (criteria == "GDP")
+      pizda <- plot_grid(
+        pEichen, pconvergencespeed+theme(legend.position="none"), pratio, labels=c("A","B","C"),
+        label_size = 15,rel_heights = c(0.38,0.31,0.31),
+        ncol = 1
+      )
+    else
+      pizda <- plot_grid(
+        pconvergencespeed+theme(legend.position="top"), pratio, labels=c("A","B"),
+        label_size = 15,rel_heights = c(0.55,0.45),
+        ncol = 1
+      )
     datos_pais$Country = country
     datos_pais$CountryCode = rawdata$Country.Code[1]
     if (print_indiv){
@@ -265,8 +272,12 @@ for (criteria in lcriteria)
       nfile <- paste0(tdir,"/ALL_",country,"_",criteria,"_",mmovper)
       prattitle <- pratiospeed+ ggtitle(paste("\n",country))
       png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
+      if (criteria == "GDP"){
+        labelphase <- "D"
+      } else
+        labelphase <- "C"
       todo <- plot_grid(
-        pizda,prattitle,labels=c(" ","D"),
+        pizda,prattitle,labels=c(" ",labelphase),
         label_size = 14,rel_widths = c(0.45,0.55),
         ncol = 2
         )
@@ -315,13 +326,24 @@ for (criteria in lcriteria)
       hplot <- 9
       nfile <- paste0(tdir,"/TIMELINE_",country,"_",criteria,"_",mmovper)
       png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
-      ptimes <- plot_grid(
-        pEichen, pconvergencespeed+geom_hline(yintercept=minconvspeed, color="red",linetype = "dotted",size=0.6),
-        pacc+xlab("Year"),pratio, labels=c("A","B","C","D"),
-        label_size = 15,
-        ncol = 1
-      )      
-      
+      if (criteria == "GDP")
+        ptimes <- plot_grid(
+          pEichen, pconvergencespeed+
+                   geom_hline(yintercept=minconvspeed, color="red",linetype = "dotted",size=0.6)+
+                   theme(legend.position="none"),
+          pacc+xlab("Year"),pratio, labels=c("A","B","C","D"),
+          label_size = 15,
+          ncol = 1
+        )
+      else
+        ptimes <- plot_grid(
+          pconvergencespeed+
+            geom_hline(yintercept=minconvspeed, color="red",linetype = "dotted",size=0.6)+
+            theme(legend.position="top"),
+          pacc+xlab("Year"),pratio, labels=c("A","B","C"),rel_heights = c(0.36,0.32,0.32),
+          label_size = 15,
+          ncol = 1
+        )
       if (print_tiff){
         tiff(paste0(nfile,".tiff"), width=wplot*ppi, height=hplot*ppi,res=ppi)
         print(ptimes)
