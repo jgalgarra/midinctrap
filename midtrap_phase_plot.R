@@ -71,8 +71,14 @@ configuration_file <- read.table("config_data/config_plots.csv", sep=";", header
 if (configuration_file$CountryCode == "MSCI"){           # Plot MSCI countries
   countries_msci <- read.csv("input_data/countries_msci.csv")
   lcountrycode <- countries_msci$ISOCode
-} else 
+  SecondCountryCode <- "NONE"  # For comparison plots
+} else {
   lcountrycode <- configuration_file$CountryCode
+  SecondCountryCode <- configuration_file$SecondCountryCode
+  if (SecondCountryCode != "NONE")
+    lcountrycode <- c(lcountrycode,SecondCountryCode)
+    
+}
 
 print_indiv <- configuration_file$print_indiv      # Print individual files
 print_tiff <- configuration_file$print_tiff        # Produce tiff files. Be careful, each tiff file weights 24 MB!
@@ -135,7 +141,7 @@ for (criteria in lcriteria)
     rawdata <- DATA_WB[DATA_WB$Country.Code==countrycode,]
     usadata <- DATA_WB[DATA_WB$Country.Name=="United States",]
     country <- DATA_WB[DATA_WB$Country.Code==countrycode,]$Country.Name
-    datos_pais <- data.frame("Year"=seq(initial_year,final_year))
+    datos_pais <- data.frame("Year"=seq(initial_year,final_year-1))
     datos_pais$Magnitude = 0
     datos_pais$growth = 0
     datos_pais$gb = 0      # Average growth backwards, for Eichengreen criterium
@@ -327,25 +333,34 @@ for (criteria in lcriteria)
         print(pphases)
         dev.off()
       }
-      
 
       nfile <- paste0(tdir,"/TIMELINE_",country,"_",criteria,"_",mmovper)
+      if (countrycode != SecondCountryCode){
+        labs_timeline <- c("A","B")
+        secondident <- ""
+      } else {        
+        labs_timeline <- c("C","D")  # For comparative side by side plots
+        secondident <- "SECOND"
+      }
       if (criteria == "GDP"){
         hplot <- 6
-        wplot <- 6
-        png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
+        if (secondident == "SECOND")
+          wplot <- 5
+        else 
+          wplot <- 6 
+        png(paste0(nfile,secondident,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
         ptimes <- plot_grid(
           pEichen, pconvergencespeed+
                    geom_hline(yintercept=minconvspeed, color="red",linetype = "dotted",size=0.6)+
                    theme(legend.position="none")+xlab("Year"),
-          labels=c("A","B"),
+          labels=labs_timeline,
           label_size = 15,rel_heights = c(0.55,0.45),
           ncol = 1
         )
       } else{
         wplot <- 7
         hplot <- 9
-        png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
+        png(paste0(nfile,secondident,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
         ptimes <- plot_grid(
           pconvergencespeed+
             geom_hline(yintercept=minconvspeed, color="red",linetype = "dotted",size=0.6)+
@@ -356,7 +371,7 @@ for (criteria in lcriteria)
         )
       }
       if (print_tiff){
-        tiff(paste0(nfile,".tiff"), width=wplot*ppi, height=hplot*ppi,res=ppi)
+        tiff(paste0(nfile,secondident,".tiff"), width=wplot*ppi, height=hplot*ppi,res=ppi)
         print(ptimes)
         dev.off()
       }
