@@ -231,7 +231,7 @@ for (criteria in lcriteria)
     
     pizda <- plot_grid(
       pEichen, pconvergencespeed, pratio, labels=c("A","B","C"),
-      label_size = 15,
+      label_size = 15,rel_heights = c(0.38,0.31,0.31),
       ncol = 1
     )
     
@@ -242,14 +242,14 @@ for (criteria in lcriteria)
       datos_acc <- datos_speed[!is.na(datos_speed$dratio_dt2_mmov),]
       datos_speed$X <- datos_speed$ratio
       datos_speed$Y <- datos_speed$dratio_dt_mmov
-      pratiospeed <- phase_plot(datos_speed,xlabel=paste(criteria,"ratio\n"),ylabel="Convergence speed",
+      pratiospeed <- phase_plot(datos_speed,xlabel=paste(criteria,"ratio"),ylabel="Convergence speed",
                         xint=NA, yint=NA,axisright = TRUE,legendpos = "left",mbreaks = my_breaks)
-      pratiospeedleft <- phase_plot(datos_speed,xlabel=paste(criteria,"ratio\n"),ylabel="Convergence speed",
+      pratiospeedleft <- phase_plot(datos_speed,xlabel=paste(criteria,"ratio"),ylabel="Convergence speed",
                                 xint=NA, yint=NA,axisright = FALSE,legendpos = "none",
                                 mbreaks = my_breaks,pais = country)
       datos_acc$X <- datos_acc$dratio_dt_mmov
       datos_acc$Y <- datos_acc$dratio_dt2_mmov
-      pspeedacc <- phase_plot(datos_acc,xlabel="Convergence speed\n",ylabel="Acceleration",
+      pspeedacc <- phase_plot(datos_acc,xlabel="Convergence speed",ylabel="Acceleration",
                               xint=minconvspeed, yint=0,axisright = FALSE,
                               legendpos = "right",mbreaks = my_breaks)
   
@@ -261,13 +261,13 @@ for (criteria in lcriteria)
       )
       
       wplot <- 13
-      hplot <- 7
+      hplot <- 8
       nfile <- paste0(tdir,"/ALL_",country,"_",criteria,"_",mmovper)
-      prattitle <- pratiospeed+ ggtitle(country)
+      prattitle <- pratiospeed+ ggtitle(paste("\n",country))
       png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
       todo <- plot_grid(
         pizda,prattitle,labels=c(" ","D"),
-        label_size = 14,
+        label_size = 14,rel_widths = c(0.45,0.55),
         ncol = 2
         )
       print(todo)
@@ -317,7 +317,7 @@ for (criteria in lcriteria)
       png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
       ptimes <- plot_grid(
         pEichen, pconvergencespeed+geom_hline(yintercept=minconvspeed, color="red",linetype = "dotted",size=0.6),
-        pacc+xlab("Year"),pratio, labels=c("A","B","C"),
+        pacc+xlab("Year"),pratio, labels=c("A","B","C","D"),
         label_size = 15,
         ncol = 1
       )      
