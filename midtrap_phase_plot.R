@@ -73,7 +73,6 @@ print_tiff <- configuration_file$print_tiff        # Produce tiff files. Be care
 initial_year <- configuration_file$initial_year
 final_year <- configuration_file$final_year
 
-
 if (configuration_file$CountryCode == "MSCI"){           # Plot MSCI countries
   countries_msci <- read.csv("input_data/countries_msci.csv")
   lcountrycode <- countries_msci$ISOCode
@@ -84,7 +83,6 @@ if (configuration_file$CountryCode == "MSCI"){           # Plot MSCI countries
   SecondCountryCode <- configuration_file$SecondCountryCode
   if (SecondCountryCode != "NONE")
     lcountrycode <- c(lcountrycode,SecondCountryCode)
-    
 }
 
 USA_perc_middle_GNI <- 0.3
@@ -110,8 +108,7 @@ if (!dir.exists(tdir)){
 ppi <- 300
 my_breaks <- c(100,500,1000,2500,5000,10000,20000,50000)
 my_breaks <- c(100,500,5000,50000)
-
-
+lplotsize <- 17 # Labels for plots
 
 for (criteria in lcriteria)
 {
@@ -170,8 +167,6 @@ for (criteria in lcriteria)
       datos_pais$dratio_dt[j] <- 100*(datos_pais$ratio[j] - datos_pais$ratio[j-1])
       }
     datos_pais$dratio_dt_mmov <- rollmean(datos_pais$dratio_dt, mmovper, fill = NA,  align = "right")
-    #datos_pais$dratio_dt2_mmov<- rollmean(datos_pais$dratio_dt2, mmovper_acc, fill = NA,  align = "right")
-    
     for (j in 2:(nrow(datos_pais)))
       datos_pais$dratio_dt2_mmov[j] <- (datos_pais$dratio_dt_mmov[j] - datos_pais$dratio_dt_mmov[j-1])
     # criteria Eichengreen
@@ -194,7 +189,7 @@ for (criteria in lcriteria)
          geom_point(size=2)+ylab(paste("Dif. Eichen (",countrycode,")"))+xlab("")+
          scale_color_discrete(limits = c('TRUE', 'FALSE'))+
          scale_x_continuous(limits=limityears,breaks=yearlabels,labels=yearlabels)+ 
-         scale_y_continuous(labels=scaleFUN)+
+         scale_y_continuous(labels=scaleFUN)+labs(colour="Slowdown")+
          theme_bw()+ 
          theme(legend.position="top",
                legend.title = element_text(face="bold", size=12),
@@ -247,13 +242,13 @@ for (criteria in lcriteria)
     if (criteria == "GDP")
       pizda <- plot_grid(
         pEichen, pconvergencespeed+theme(legend.position="none"), pratio, labels=c("A","B","C"),
-        label_size = 15,rel_heights = c(0.38,0.31,0.31),
+        label_size = lplotsize,rel_heights = c(0.38,0.31,0.31),
         ncol = 1
       )
     else
       pizda <- plot_grid(
         pconvergencespeed+theme(legend.position="top"), pratio, labels=c("A","B"),
-        label_size = 15,rel_heights = c(0.55,0.45),
+        label_size = lplotsize,rel_heights = c(0.55,0.45),
         ncol = 1
       )
     datos_pais$Country = country
@@ -287,8 +282,8 @@ for (criteria in lcriteria)
       }
       
       pphases <- plot_grid(
-        pratiospeedleft, pspeedacc, labels=labs_phase,
-        label_size = 15,
+        pratiospeedleft+ggtitle(""), pspeedacc+ggtitle(""), labels=labs_phase,
+        label_size = lplotsize,
         ncol = 2, rel_widths = c(0.47,0.53)
       )
       
@@ -303,7 +298,7 @@ for (criteria in lcriteria)
         labelphase <- "C"
       todo <- plot_grid(
         pizda,prattitle,labels=c(" ",labelphase),
-        label_size = 14,rel_widths = c(0.45,0.55),
+        label_size = lplotsize, rel_widths = c(0.45,0.55),
         ncol = 2
         )
       print(todo)
@@ -323,8 +318,10 @@ for (criteria in lcriteria)
       dev.off()
       
       if (print_tiff){
+        wplot <- 6
+        hplot <- 6
         tiff(paste0(nfile,".tiff"), width=wplot*ppi, height=hplot*ppi,res=ppi)
-        print(prattitle)
+        print(pratiospeedleft)
         dev.off()
       }
       
@@ -349,13 +346,13 @@ for (criteria in lcriteria)
 
       nfile <- paste0(tdir,"/TIMELINE_",country,"_",criteria,"_",mmovper)
       if (SecondCountryCode == "NONE"){
-        labs_timeline <- c("A","B")
+        labs_timeline <- c("A","C")
         secondident <- ""
       } else {      
         if (SecondCountryCode == countrycode)
-          labs_timeline <- c("C","D")  # For comparative side by side plots
+          labs_timeline <- c("B","D")  # For comparative side by side plots
         else
-          labs_timeline <- c("A","B")
+          labs_timeline <- c("A","C")
         secondident <- "SECOND"
       }
       if (criteria == "GDP"){
@@ -366,11 +363,11 @@ for (criteria in lcriteria)
           wplot <- 6 
         png(paste0(nfile,secondident,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
         ptimes <- plot_grid(
-          pEichen, pconvergencespeed+
+          pEichen, pconvergencespeed+ggtitle("")+
                    geom_hline(yintercept=minconvspeed, color="red",linetype = "dotted",size=0.6)+
                    theme(legend.position="none")+xlab("Year"),
           labels=labs_timeline,
-          label_size = 15,rel_heights = c(0.55,0.45),
+          label_size = lplotsize,rel_heights = c(0.52,0.48),
           ncol = 1
         )
       } else{
@@ -382,7 +379,7 @@ for (criteria in lcriteria)
             geom_hline(yintercept=minconvspeed, color="red",linetype = "dotted",size=0.6)+
             theme(legend.position="top"),
           pacc+xlab("Year"),pratio, labels=c("A","B","C"),rel_heights = c(0.36,0.32,0.32),
-          label_size = 15,
+          label_size = lplotsize,
           ncol = 1
         )
       }
