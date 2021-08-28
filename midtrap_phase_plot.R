@@ -90,7 +90,7 @@ if (configuration_file$CountryCode == "MSCI"){           # Plot MSCI countries
 USA_perc_middle_GNI <- 0.3
 USA_perc_middle_GDP <- 0.5
 minaccel_GDP <- 0
-minaccel_GNI <- -1
+minaccel_GNI <- -0.5
 mmovper <- 5
 last_year_Ecihengreen <- 2013
 mingb_GDP <- 3.5
@@ -100,7 +100,7 @@ mingb_GNI <- 3.5
 mindif_GNI <- -2
 minMagnitude_GNI <- 10000
 minconvspeed_GDP <- 0.7
-minconvspeed_GNI <- 2
+minconvspeed_GNI <- 1.5
 tdir1 <- "figs"
 tdir <- paste0(tdir1,"/countries")
 if (!dir.exists(tdir)){
@@ -221,7 +221,7 @@ for (criteria in lcriteria)
                                axis.title.x = element_text(face="bold", size=13),
                                axis.title.y  = element_text(face="bold", size=13))
     if (criteria=="GDP")
-      pconvergencespeed <- pconvergencespeed + labs(colour="Trapped")
+      pconvergencespeed <- pconvergencespeed + labs(colour="Slowdown")
     else
       pconvergencespeed <- pconvergencespeed + labs(colour="Eichengreen-like trapped")
     pratio <- ggplot(data= datosEich, aes(x=Year,y=ratio))+
