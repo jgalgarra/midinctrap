@@ -90,7 +90,7 @@ if (configuration_file$CountryCode == "MSCI"){           # Plot MSCI countries
 USA_perc_middle_GNI <- 0.3
 USA_perc_middle_GDP <- 0.5
 minaccel_GDP <- 0
-minaccel_GNI <- -0.5
+minaccel_GNI <- -0.25
 mmovper <- 5
 last_year_Ecihengreen <- 2013
 mingb_GDP <- 3.5
@@ -275,8 +275,19 @@ for (criteria in lcriteria)
                               legendpos = "right",mbreaks = my_breaks)
   
       
+      if (SecondCountryCode == "NONE"){
+        labs_phase <- c("A","B")
+        secondident <- ""
+      } else {      
+        if (SecondCountryCode == countrycode)
+          labs_phase <- c("C","D")  # For comparative side by side plots
+        else
+          labs_phase <- c("A","B")
+        secondident <- "SECOND"
+      }
+      
       pphases <- plot_grid(
-        pratiospeedleft, pspeedacc, labels=c("A","B"),
+        pratiospeedleft, pspeedacc, labels=labs_phase,
         label_size = 15,
         ncol = 2, rel_widths = c(0.47,0.53)
       )
@@ -326,12 +337,12 @@ for (criteria in lcriteria)
       wplot <- 14
       hplot <- 6
       nfile <- paste0(tdir,"/PHASES_",country,"_",criteria,"_",mmovper)
-      png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
+      png(paste0(nfile,secondident,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
       print(pphases)
       dev.off()
       
       if (print_tiff){
-        tiff(paste0(nfile,".tiff"), width=wplot*ppi, height=hplot*ppi,res=ppi)
+        tiff(paste0(nfile,secondident,".tiff"), width=wplot*ppi, height=hplot*ppi,res=ppi)
         print(pphases)
         dev.off()
       }
