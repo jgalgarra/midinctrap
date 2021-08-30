@@ -218,7 +218,7 @@ for (criteria in lcriteria)
     if (criteria=="GDP")
       pconvergencespeed <- pconvergencespeed + labs(colour="Slowdown")
     else
-      pconvergencespeed <- pconvergencespeed + labs(colour="Eichengreen-like trapped")
+      pconvergencespeed <- pconvergencespeed + labs(colour="Eichengreen-like slowdown")
     pratio <- ggplot(data= datosEich, aes(x=Year,y=ratio))+
       geom_point(size=2,col="black",alpha=0.5)+ylab(paste(criteria,"Ratio"))+
       scale_x_continuous(limits=limityears, breaks=yearlabels,labels=yearlabels)+
