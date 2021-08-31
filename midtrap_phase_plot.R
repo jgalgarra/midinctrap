@@ -149,7 +149,7 @@ for (criteria in lcriteria)
     datos_pais$dgrowth_dt = 0
     datos_pais$USAMagnitude = 0
     datos_pais$ratio = NA
-    datos_pais$drat4rio_dt = 0
+    datos_pais$dratio_dt = 0
     datos_pais$dratio_dt_mmov = 0
     datos_pais$dratio_dt2_mmov = NA
     period_calc = 7

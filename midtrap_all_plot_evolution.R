@@ -59,7 +59,7 @@ for (criteria in lcriteria)
     geom_point(aes(y = distY, x = distX, color=CountryCode), alpha=0.8,size=2.5)+
     geom_path(aes(y = distY, x = distX,color=CountryCode),alpha=0.4,
               size = 0.5, arrow = arrow(length = unit(0.3, "cm"),type="closed"))+
-    geom_text_repel(aes(label=paste0(CountryCode," ",PeriodStart,"/",PeriodStart+hop-1*(PeriodStart+hop==2020)," "),
+    geom_text_repel(aes(label=paste0(CountryCode," ",PeriodStart,"/",PeriodStart+hop-1," "),
                         y = distY, x = distX,color=CountryCode),alpha=0.8,size=4)+
     xlab(paste("Avg.",criteria,"ratio")) + ylab ("Avg. convergence speed")+
     theme_bw()+
