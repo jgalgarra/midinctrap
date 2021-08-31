@@ -28,6 +28,8 @@ if (!dir.exists(tdir))
 start_year <- 1980
 end_year <- 2019
 
+magnitud <- "speed"
+
 countries_msci <- read.csv("input_data/countries_msci.csv")
 group_ASIA <- read.csv(paste0("input_data/group_ASIA.csv"))
 group_LATAM <- read.csv(paste0("input_data/group_LATAM.csv"))
@@ -88,11 +90,14 @@ names(datosframe)=namesp
 
 for (k in 1:ncolumns){
   print(names(datosframe)[k])
-  # if (length(datosseries[datosseries$CountryCode==names(datosframe)[k],]$dratio_dt_mmov)==length(datosframe[,k]))
-  #   datosframe[,k] <- datosseries[datosseries$CountryCode==names(datosframe)[k],]$dratio_dt_mmov
+  if (magnitud == "ratio"){
+  if (length(datosseries[datosseries$CountryCode==names(datosframe)[k],]$dratio_dt_mmov)==length(datosframe[,k]))
+     datosframe[,k] <- datosseries[datosseries$CountryCode==names(datosframe)[k],]$dratio_dt_mmov
+  }
+  else{
   if (length(datosseries[datosseries$CountryCode==names(datosframe)[k],]$ratio)==length(datosframe[,k]))
     datosframe[,k] <- datosseries[datosseries$CountryCode==names(datosframe)[k],]$ratio
-  
+  }
 }
 removecols <- c()
 for (k in 1:ncolumns)
@@ -101,40 +106,44 @@ for (k in 1:ncolumns)
 if (!is.null((removecols)))
   datosframe <- datosframe[,-removecols]
 
-npaises <- ncol(datosframe)
+
 M<-cor(datosframe,use="complete.obs",method="spearman")
-MKol <- matrix(nrow = npaises,ncol = npaises)
-rownames(MKol) <- names(datosframe)
-colnames(MKol) <- names(datosframe)
-for (i in 1:nrow(MKol))
-  for (j in 1:ncol(MKol))
-    MKol[i,j] <- ks.dist(datosframe[,i],datosframe[,j])$D
-corrplot(M,order="hclust",tl.col="black",tl.cex = 0.5)
+corrplot(M,order="hclust",tl.col="black",tl.cex = 0.6,
+         type = 'upper', diag = FALSE)
 
-auxorden <- data.frame("CountryCode" = rownames(MKol))
-auxorden$sbyrows <- rep(0,npaises)
-for (k in 1:npaises)
-  auxorden$sbyrows[k] <- sum(MKol[k,])
-ordMKol <- (order(auxorden$sbyrows))
-MKol <- MKol[rev(ordMKol),ordMKol]
-melted_Kol <- melt(MKol, na.rm = TRUE)
-
-melted_Kol$sqvalue <- sqrt(melted_Kol$value)
-
-p <- ggplot(data = melted_Kol, aes(Var2, Var1, fill = sqvalue))+
-  geom_tile(color = "white")+
-  scale_fill_gradient(low = "blue", high = "red", 
-                       limit = c(0,max(melted_Kol$sqvalue)), space = "Lab", 
-                       name="KS distance") +
-  theme_minimal()+ 
-  theme(axis.text = element_text(vjust = 1, 
-                                   size = 6, hjust = 1),
-        axis.text.x = element_text(angle = 90))+
-  coord_fixed()
-
-plot(p)
-MPKol <- sqrt(MKol)# 1-(MKol/max(MKol))
-corrplot(MPKol,tl.col="black",tl.cex = 0.5, cl.lim=c(min(MPKol),max(MPKol)),
-         #col=colorRampPalette(c("grey","white","blue"))(2000),
-         order="hclust",
-         is.corr = FALSE)
+npaises <- ncol(datosframe)
+# MKol <- matrix(nrow = npaises,ncol = npaises)
+# rownames(MKol) <- names(datosframe)
+# colnames(MKol) <- names(datosframe)
+# for (i in 1:nrow(MKol))
+#   for (j in 1:ncol(MKol))
+#     MKol[i,j] <- ks.dist(datosframe[,i],datosframe[,j])$D
+# 
+# auxorden <- data.frame("CountryCode" = rownames(MKol))
+# auxorden$sbyrows <- rep(0,npaises)
+# for (k in 1:npaises)
+#   auxorden$sbyrows[k] <- sum(MKol[k,])
+# ordMKol <- (order(auxorden$sbyrows))
+# MKol <- MKol[rev(ordMKol),ordMKol]
+# melted_Kol <- melt(MKol, na.rm = TRUE)
+# 
+# melted_Kol$sqvalue <- sqrt(melted_Kol$value)
+# 
+# p <- ggplot(data = melted_Kol, aes(Var2, Var1, fill = sqvalue))+
+#   geom_tile(color = "white")+
+#   scale_fill_gradient(low = "white", high = "red", 
+#                        limit = c(0,max(melted_Kol$sqvalue)), space = "Lab", 
+#                        name="KS distance") +
+#   theme_minimal()+ 
+#   theme(axis.text = element_text(vjust = 1, 
+#                                    size = 6, hjust = 1),
+#         axis.text.x = element_text(angle = 90))+
+#   coord_fixed()
+# 
+# plot(p)
+# MPKol <- (1-MKol)/max(1-MKol)
+# corrplot(MPKol,tl.col="black",tl.cex = 0.5, #cl.lim=c(min(MPKol),max(MPKol)),
+#          #col=colorRampPalette(c("grey","white","blue"))(2000),
+#          cl.labels = c("a","b","c"),
+#          order="hclust")#,
+#          #is.corr = FALSE)
