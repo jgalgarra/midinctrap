@@ -4,7 +4,7 @@
 # Author: Javier Garcia-Algarra
 # August 2021
 # 
-# Inputs:  input_data/countires_msci.csv
+# Inputs:  input_data/countries_msci.csv
 #          input_data/<countries by region for regression>.csv
 #          output_data/all_speeds_criteria.csv"
 # Results: figs/ALL_DISTANCES*.png .tiff

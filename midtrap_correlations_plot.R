@@ -4,11 +4,12 @@
 # Author: Javier Garcia-Algarra
 # August 2021
 # 
-# Inputs:  input_data/countires_msci.csv
+# Inputs:  input_data/countries_msci.csv
 #          input_data/<countries by region for regression>.csv
 #          output_data/all_speeds_criteria.csv"
 # Results: figs/ALL_DISTANCES*.png .tiff
 
+#          output_data/KSdist_speed_criteria.csv
 library(reshape2)
 library(ggplot2)
 library(ggrepel)
@@ -23,16 +24,14 @@ library(igraph)
 
 
 myfun <- function(M){
-  corrplot(M,order="hclust",tl.col="black",tl.cex = 0.8,
+  corrplot(M,order="hclust",tl.col="black",tl.cex = 0.8,lg.cex=1,
            type = 'upper', diag = FALSE)
   recordPlot() # record the latest plot
 }
 
-# 
-# criteria <- read.table("config_data/criteria.txt")
-# lcriteria <- criteria$V1
 
-lcriteria <- c("GDP")
+criteria <- read.table("config_data/criteria.txt")
+lcriteria <- criteria$V1
 
 tdir <- "figs"
 if (!dir.exists(tdir))
@@ -52,9 +51,10 @@ onlyMSCI <- TRUE
 
 for (criteria in lcriteria)
 {
+  print(criteria)
   for (magnitud in lmagnitud)
   {
-      print(criteria)
+      print(magnitud)
       datos_all <- read.csv(paste0("output_data/all_speeds_",criteria,".csv"))
       datos_all <- datos_all[(datos_all$Year>=start_year) & (datos_all$Year<=end_year),]
     
@@ -84,7 +84,6 @@ for (criteria in lcriteria)
             print(paste("Excluded",k))
       }
        
-    
     namesp <- unique(datosseries$CountryCode)
     ncolumns <- length(namesp)
     nullcol <- rep(0,end_year-start_year+1)
@@ -130,6 +129,9 @@ for (criteria in lcriteria)
     png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
     print(p)
     dev.off()
+    png(paste0(nfile,".tiff"), width=wplot*ppi, height=hplot*ppi, res=ppi)
+    print(p)
+    dev.off()
   }
   
   todo <- plot_grid(
@@ -150,6 +152,7 @@ for (criteria in lcriteria)
     
     melted_Kol <- melt(MKol, na.rm = TRUE)
     melted_Kol <- melted_Kol[melted_Kol$Var1 != melted_Kol$Var2,]
+    write.csv(melted_Kol,paste0("output_data/KSdist_speed_",criteria,".csv"))
     dKol <- dist(melted_Kol)
     g1 <- graph_from_adjacency_matrix(MKol, mode = "undirected", weighted = TRUE) %>%
          set_vertex_attr("color", value = "blue")  %>%
@@ -161,12 +164,15 @@ for (criteria in lcriteria)
     dframe[,is.element(names(dframe),countries_msci[countries_msci$Category == "Developed",]$ISOCode)]
     l <- layout_with_kk(g1)
     par(mar=c(1,1,1,1))
+    vsizes <- rep(0,length(V(g1)))
+    for (i in 1:length(vsizes))
+      vsizes[i] <- sqrt(mean(datos_all[datos_all$CountryCode==names(V(g1)[i]),]$ratio))
     plot(g1,layout=l, diag=FALSE,
-         vertex.size=15,
-         vertex.color = adjustcolor(V(g1)$color, alpha.f = .5),
+         vertex.size=7+9*(vsizes),
+         vertex.color = adjustcolor(V(g1)$color, alpha.f = .4),
          vertex.label.cex=0.7,
          vertex.label.color="black",
-         vertex.label.family="Arial",
+         vertex.label.family="Helvetica",
          vertex.frame.color="transparent")
     recordPlot() # record the latest plot
   }
@@ -177,6 +183,9 @@ for (criteria in lcriteria)
   nfile <- paste0(tdir,"/NETWORKSPEED_",criteria,"_",magnitud)
   ppi <- 300
   png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
+  print(pnspeedall)
+  dev.off()
+  tiff(paste0(nfile,".tiff"), width=wplot*ppi, height=hplot*ppi,res=ppi)
   print(pnspeedall)
   dev.off()
 }
