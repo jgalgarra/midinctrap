@@ -62,6 +62,21 @@ phase_plot <- function(datos,xlabel="",ylabel="",xint=NA,yint=NA,
   return(pphase)
 }
 
+print_2_tiff <- function(print_tiff,plot,nfile,wplot,hplot)
+{
+  if (print_tiff){
+    tiff(paste0(nfile,".tiff"), width=wplot*ppi, height=hplot*ppi,res=ppi)
+    print(plot)
+    dev.off()
+  }
+}
+
+print_2_png <- function(plot,nfile,wplot,hplot)
+{
+  png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
+  print(plot)
+  dev.off()
+}
 
 
 criteria <- read.table("config_data/criteria.txt")
@@ -307,49 +322,26 @@ for (criteria in lcriteria)
         label_size = lplotsize, rel_widths = c(0.45,0.55),
         ncol = 2
         )
-      print(todo)
-      dev.off()
-      
-      if (print_tiff){
-        tiff(paste0(nfile,".tiff"), width=wplot*ppi, height=hplot*ppi,res=ppi)
-        print(todo)
-        dev.off()
-      }
+      print_2_png(todo,nfile,wplot,hplot)
+      print_2_tiff(print_tiff,todo,nfile,wplot,hplot)
       
       wplot <- 7
       hplot <- 7
       nfile <- paste0(tdir,"/RATIOSvsSPEED_",country,"_",criteria,"_",mmovper)
-      png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
-      print(pratiospeedleft)
-      dev.off()
-      
-      if (print_tiff){
-        wplot <- 6
-        hplot <- 6
-        tiff(paste0(nfile,".tiff"), width=wplot*ppi, height=hplot*ppi,res=ppi)
-        print(pratiospeedleft)
-        dev.off()
-      }
+      print_2_png(pratiospeedleft,nfile,wplot,hplot)
+      wplot <- 6
+      hplot <- 6
+      print_2_tiff(print_tiff,pratiospeedleft,nfile,wplot,hplot)
       
       nfile <- paste0(tdir,"/SPEEDvsACC_",country,"_",criteria,"_",mmovper)
-      png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
-      print(pspeedacc)
-      dev.off()
-      
+      print_2_png(pspeedacc,nfile,wplot,hplot)
       
       wplot <- 14
       hplot <- 6
       nfile <- paste0(tdir,"/PHASES_",country,"_",criteria,"_",mmovper)
-      png(paste0(nfile,secondident,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
-      print(pphases)
-      dev.off()
-      
-      if (print_tiff){
-        tiff(paste0(nfile,secondident,".tiff"), width=wplot*ppi, height=hplot*ppi,res=ppi)
-        print(pphases)
-        dev.off()
-      }
-      
+      print_2_png(pphases,paste0(nfile,secondident),wplot,hplot)
+      print_2_tiff(print_tiff,pphases,paste0(nfile,secondident),wplot,hplot)
+
       # Two countries comparison speed
       if (SecondCountryCode == countrycode){
         pcompspeed <- plot_grid(
@@ -361,15 +353,8 @@ for (criteria in lcriteria)
         wplot <- 14
         hplot <- 6
         nfile <- paste0(tdir,"/SPEEDCOMP_",country1,"_",country2,"_",criteria,"_",mmovper)
-        png(paste0(nfile,secondident,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
-        print(pcompspeed)
-        dev.off()
-        
-        if (print_tiff){
-          tiff(paste0(nfile,secondident,".tiff"), width=wplot*ppi, height=hplot*ppi,res=ppi)
-          print(pcompspeed)
-          dev.off()
-        }
+        print_2_png(pcompspeed,paste0(nfile,secondident),wplot,hplot)
+        print_2_tiff(print_tiff,pcompspeed,paste0(nfile,secondident),wplot,hplot)
       }
 
       nfile <- paste0(tdir,"/TIMELINE_",country,"_",criteria,"_",mmovper)
@@ -389,7 +374,6 @@ for (criteria in lcriteria)
           wplot <- 5
         else 
           wplot <- 6 
-        png(paste0(nfile,secondident,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
         ptimes <- plot_grid(
           pEichen, pconvergencespeed+ggtitle("")+
                    geom_hline(yintercept=minconvspeed, color="red",linetype = "dotted",size=0.6)+
@@ -401,7 +385,6 @@ for (criteria in lcriteria)
       } else{
         wplot <- 7
         hplot <- 9
-        png(paste0(nfile,secondident,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
         ptimes <- plot_grid(
           pconvergencespeed+
             geom_hline(yintercept=minconvspeed, color="red",linetype = "dotted",size=0.6)+
@@ -411,14 +394,8 @@ for (criteria in lcriteria)
           ncol = 1
         )
       }
-      if (print_tiff){
-        tiff(paste0(nfile,secondident,".tiff"), width=wplot*ppi, height=hplot*ppi,res=ppi)
-        print(ptimes)
-        dev.off()
-      }
-      
-      print(ptimes)
-      dev.off()
+      print_2_png(ptimes,paste0(nfile,secondident),wplot,hplot)
+      print_2_tiff(print_tiff,ptimes,paste0(nfile,secondident),wplot,hplot)
     }
     if (count_countries == 1)
       datos_all <- datos_pais
@@ -443,5 +420,4 @@ for (criteria in lcriteria)
   if (length(lcountrycode)>5)  # to avoid accidental overwriting when testing with a short list
      write.csv(datos_all,paste0("output_data/all_speeds_",criteria,".csv"),row.names = FALSE)
      remove("datos_all")
-
 }
