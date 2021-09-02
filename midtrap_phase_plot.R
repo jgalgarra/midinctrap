@@ -41,7 +41,7 @@ phase_plot <- function(datos,xlabel="",ylabel="",xint=NA,yint=NA,
                           breaks = mbreaks, labels = mbreaks,limits=c(100,100000))+
     geom_text_repel(data=subset(datos,(Year%%4 == 0) | (Year==max(Year)) | (Year==min(Year))),
                     aes(label=sprintf("'%02d",Year%%100),y = Y, x = X),
-                    hjust=-2,vjust=-0.2, size=3.5, color= "black" )+
+                    hjust=3,vjust=-0.2, size=3.5, color= "black" )+
     xlab(paste(pais,xlabel)) + ylab(ylabel)+ theme_bw()+
     theme(panel.grid.minor = element_blank(),
           panel.grid.major = element_line(size = 0.8,linetype = "dotted"),
@@ -258,7 +258,7 @@ for (criteria in lcriteria)
       datos_acc <- datos_speed[!is.na(datos_speed$dratio_dt2_mmov),]
       datos_speed$X <- datos_speed$ratio
       datos_speed$Y <- datos_speed$dratio_dt_mmov
-      pratiospeed <- phase_plot(datos_speed,xlabel=paste(criteria,"Ratio"),ylabel="Convergence speed",
+      pratiospeed <- phase_plot(datos_speed,xlabel=paste(criteria,"ratio"),ylabel="Convergence speed",
                         xint=NA, yint=NA,axisright = TRUE,legendpos = "left",mbreaks = my_breaks)
       pratiospeedleft <- phase_plot(datos_speed,xlabel=paste(criteria,"ratio"),ylabel="Convergence speed",
                                 xint=NA, yint=NA,axisright = FALSE,legendpos = "none",
@@ -274,10 +274,16 @@ for (criteria in lcriteria)
         labs_phase <- c("A","B")
         secondident <- ""
       } else {      
-        if (SecondCountryCode == countrycode)
+        if (SecondCountryCode == countrycode){
           labs_phase <- c("C","D")  # For comparative side by side plots
-        else
+          pratiospeedsecond <- pratiospeed+xlab(paste(country,criteria,"ratio"))
+          country2 <- country
+        }
+        else{
           labs_phase <- c("A","B")
+          pratiospeedfirst <- pratiospeedleft
+          country1 <- country
+        }
         secondident <- "SECOND"
       }
       
@@ -342,6 +348,28 @@ for (criteria in lcriteria)
         tiff(paste0(nfile,secondident,".tiff"), width=wplot*ppi, height=hplot*ppi,res=ppi)
         print(pphases)
         dev.off()
+      }
+      
+      # Two countries comparison speed
+      if (SecondCountryCode == countrycode){
+        pcompspeed <- plot_grid(
+          pratiospeedfirst+ggtitle(""), pratiospeedsecond + ggtitle(""), labels=c("A","B"),
+          label_size = lplotsize,
+          ncol = 2, rel_widths = c(0.47,0.53)
+        )
+        
+        wplot <- 14
+        hplot <- 6
+        nfile <- paste0(tdir,"/SPEEDCOMP_",country1,"_",country2,"_",criteria,"_",mmovper)
+        png(paste0(nfile,secondident,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
+        print(pcompspeed)
+        dev.off()
+        
+        if (print_tiff){
+          tiff(paste0(nfile,secondident,".tiff"), width=wplot*ppi, height=hplot*ppi,res=ppi)
+          print(pcompspeed)
+          dev.off()
+        }
       }
 
       nfile <- paste0(tdir,"/TIMELINE_",country,"_",criteria,"_",mmovper)
