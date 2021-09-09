@@ -312,7 +312,6 @@ for (criteria in lcriteria)
       hplot <- 8
       nfile <- paste0(tdir,"/ALL_",country,"_",criteria,"_",mmovper)
       prattitle <- pratiospeed+ ggtitle(paste("\n",country))
-      png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
       if (criteria == "GDP"){
         labelphase <- "D"
       } else
@@ -420,4 +419,5 @@ for (criteria in lcriteria)
   if (length(lcountrycode)>5)  # to avoid accidental overwriting when testing with a short list
      write.csv(datos_all,paste0("output_data/all_speeds_",criteria,".csv"),row.names = FALSE)
      remove("datos_all")
+
 }
