@@ -54,7 +54,7 @@ for (criteria in lcriteria)
     #print(paste(k,"number of values",length(datosx)))
     datosy <- datos_all[(datos_all$Country == k) & !is.na(datos_all$dratio_dt_mmov),]$dratio_dt_mmov
     datos_MSCI <- countries_msci[countries_msci$ISOCode == k,]
-    if ((length(datosx)>30) ){
+    if ((length(datosx)>=30) ){
       if ((onlyMSCI) & (datos_MSCI$Category != "None"))
       datadist <- rbind(datadist,data.frame("Country"=k,"CountryCode"= clean_data$CountryCode[1],"Region"=datos_MSCI$Region,
                                             "MSCI Category"= datos_MSCI$Category, "distX"=mean(clean_data$ratio),
@@ -62,7 +62,7 @@ for (criteria in lcriteria)
     } 
     else
       if ((onlyMSCI) & (datos_MSCI$Category != "None"))
-        print(paste("Excluded",k))
+        print(paste("Excluded",k,"Series length", length(datosx)))
   }
    
   # Y transform to plot over a squared root scale
