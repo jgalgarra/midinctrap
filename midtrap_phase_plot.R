@@ -87,6 +87,9 @@ print_indiv <- configuration_file$print_indiv      # Print individual files
 print_tiff <- configuration_file$print_tiff        # Produce tiff files. Be careful, each tiff file weights 24 MB!
 initial_year <- configuration_file$initial_year
 final_year <- configuration_file$final_year
+labelspair <- c("A","B")                           # Default value for side by side plots
+if (configuration_file$LabelsInitialPair=="C")
+  labelspair = c("C","D")
 
 if (configuration_file$CountryCode == "MSCI"){           # Plot MSCI countries
   countries_msci <- read.csv("input_data/countries_msci.csv")
@@ -344,7 +347,7 @@ for (criteria in lcriteria)
       # Two countries comparison speed
       if (SecondCountryCode == countrycode){
         pcompspeed <- plot_grid(
-          pratiospeedfirst+ggtitle(""), pratiospeedsecond + ggtitle(""), labels=c("A","B"),
+          pratiospeedfirst+ggtitle(""), pratiospeedsecond + ggtitle("") + ylab("                 "), labels=labelspair,
           label_size = lplotsize,
           ncol = 2, rel_widths = c(0.47,0.53)
         )

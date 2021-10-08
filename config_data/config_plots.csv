@@ -1,2 +1,2 @@
-CountryCode;SecondCountryCode;print_indiv;print_tiff;initial_year;final_year
-DNK;FIN;TRUE;FALSE;1960;2020
+CountryCode;SecondCountryCode;LabelsInitialPair;print_indiv;print_tiff;initial_year;final_year
+BRA;ZAF;A;TRUE;TRUE;1960;2020

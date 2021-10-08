@@ -24,7 +24,7 @@ if (!dir.exists(tdir))
   dir.create(tdir)
 
 start_year <- 1980
-end_year <- 2019
+end_year <- 2008
 
 countries_msci <- read.csv("input_data/countries_msci.csv")
 group_ASIA <- read.csv(paste0("input_data/group_ASIA.csv"))
@@ -50,11 +50,12 @@ for (criteria in lcriteria)
   for (k in lp){
     clean_data <- datos_all[(datos_all$CountryCode == k) & !is.na(datos_all$ratio) & 
                             !is.na(datos_all$dratio_dt_mmov),]
-    datosx <- datos_all[(datos_all$CountryCode == k) & !is.na(datos_all$ratio),]$ratio
-    #print(paste(k,"number of values",length(datosx)))
+    clean_data <- clean_data[(clean_data$Year>=start_year) & (clean_data$Year<=end_year),]
+    datosx <- clean_data[(clean_data$CountryCode == k) & !is.na(clean_data$ratio),]$ratio
+    print(paste(k,"number of values",length(datosx)))
     datosy <- datos_all[(datos_all$Country == k) & !is.na(datos_all$dratio_dt_mmov),]$dratio_dt_mmov
     datos_MSCI <- countries_msci[countries_msci$ISOCode == k,]
-    if ((length(datosx)>=30) ){
+    if ((length(datosx)>=round(0.75*(end_year-start_year))) ){
       if ((onlyMSCI) & (datos_MSCI$Category != "None"))
       datadist <- rbind(datadist,data.frame("Country"=k,"CountryCode"= clean_data$CountryCode[1],"Region"=datos_MSCI$Region,
                                             "MSCI Category"= datos_MSCI$Category, "distX"=mean(clean_data$ratio),
