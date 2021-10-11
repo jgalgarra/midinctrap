@@ -361,7 +361,7 @@ for (criteria in lcriteria)
 
       nfile <- paste0(tdir,"/TIMELINE_",country,"_",criteria,"_",mmovper)
       if (SecondCountryCode == "NONE"){
-        labs_timeline <- c("A","C")
+        labs_timeline <- c("A","B")
         secondident <- ""
       } else {      
         if (SecondCountryCode == countrycode)
