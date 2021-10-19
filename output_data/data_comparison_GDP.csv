@@ -1,0 +1,281 @@
+"Country","Year","GDP_PPP_USD2010"
+"Spain",1980,17478
+"Spain",1981,17331
+"Spain",1982,17442
+"Spain",1983,17665
+"Spain",1984,17905
+"Spain",1985,18255
+"Spain",1986,18792
+"Spain",1987,19783
+"Spain",1988,20747
+"Spain",1989,21715
+"Spain",1990,22513
+"Spain",1991,23027
+"Spain",1992,23128
+"Spain",1993,22771
+"Spain",1994,23203
+"Spain",1995,23737
+"Spain",1996,24268
+"Spain",1997,25061
+"Spain",1998,26054
+"Spain",1999,27114
+"Spain",2000,28409
+"Spain",2001,29322
+"Spain",2002,29700
+"Spain",2003,30038
+"Spain",2004,30446
+"Spain",2005,31029
+"Spain",2006,31761
+"Spain",2007,32302
+"Spain",2008,32073
+"Spain",2009,30594
+"Spain",2010,30503
+"Spain",2011,30147
+"Spain",2012,29236
+"Spain",2013,28911
+"Spain",2014,29399
+"Spain",2015,30550
+"Spain",2016,31449
+"Spain",2017,32309
+"Spain",2018,32949
+"Spain",2019,33393
+"Italy",1980,24476
+"Italy",1981,24653
+"Italy",1982,24736
+"Italy",1983,25016
+"Italy",1984,25818
+"Italy",1985,26532
+"Italy",1986,27290
+"Italy",1987,28158
+"Italy",1988,29325
+"Italy",1989,30296
+"Italy",1990,30871
+"Italy",1991,31325
+"Italy",1992,31564
+"Italy",1993,31276
+"Italy",1994,31942
+"Italy",1995,32864
+"Italy",1996,33271
+"Italy",1997,33862
+"Italy",1998,34465
+"Italy",1999,35020
+"Italy",2000,36329
+"Italy",2001,37017
+"Italy",2002,37056
+"Italy",2003,36943
+"Italy",2004,37227
+"Italy",2005,37348
+"Italy",2006,37902
+"Italy",2007,38272
+"Italy",2008,37654
+"Italy",2009,35503
+"Italy",2010,36001
+"Italy",2011,36193
+"Italy",2012,35019
+"Italy",2013,33979
+"Italy",2014,33667
+"Italy",2015,33961
+"Italy",2016,34459
+"Italy",2017,35086
+"Italy",2018,35485
+"Italy",2019,35680
+"Brazil",1980,8349
+"Brazil",1981,7797
+"Brazil",1982,7661
+"Brazil",1983,7231
+"Brazil",1984,7443
+"Brazil",1985,7863
+"Brazil",1986,8317
+"Brazil",1987,8446
+"Brazil",1988,8276
+"Brazil",1989,8390
+"Brazil",1990,7984
+"Brazil",1991,7963
+"Brazil",1992,7792
+"Brazil",1993,8021
+"Brazil",1994,8312
+"Brazil",1995,8540
+"Brazil",1996,8591
+"Brazil",1997,8745
+"Brazil",1998,8641
+"Brazil",1999,8554
+"Brazil",2000,8803
+"Brazil",2001,8804
+"Brazil",2002,8955
+"Brazil",2003,8944
+"Brazil",2004,9346
+"Brazil",2005,9535
+"Brazil",2006,9806
+"Brazil",2007,10294
+"Brazil",2008,10711
+"Brazil",2009,10595
+"Brazil",2010,11286
+"Brazil",2011,11628
+"Brazil",2012,11746
+"Brazil",2013,11993
+"Brazil",2014,11951
+"Brazil",2015,11431
+"Brazil",2016,10966
+"Brazil",2017,11022
+"Brazil",2018,11080
+"Brazil",2019,11122
+"South Africa",1980,6722
+"South Africa",1981,6895
+"South Africa",1982,6682
+"South Africa",1983,6381
+"South Africa",1984,6527
+"South Africa",1985,6283
+"South Africa",1986,6131
+"South Africa",1987,6113
+"South Africa",1988,6224
+"South Africa",1989,6226
+"South Africa",1990,6060
+"South Africa",1991,5852
+"South Africa",1992,5586
+"South Africa",1993,5518
+"South Africa",1994,5564
+"South Africa",1995,5615
+"South Africa",1996,5745
+"South Africa",1997,5792
+"South Africa",1998,5728
+"South Africa",1999,5779
+"South Africa",2000,5938
+"South Africa",2001,6017
+"South Africa",2002,6161
+"South Africa",2003,6266
+"South Africa",2004,6472
+"South Africa",2005,6730
+"South Africa",2006,7018
+"South Africa",2007,7299
+"South Africa",2008,7432
+"South Africa",2009,7217
+"South Africa",2010,7329
+"South Africa",2011,7455
+"South Africa",2012,7500
+"South Africa",2013,7564
+"South Africa",2014,7583
+"South Africa",2015,7557
+"South Africa",2016,7477
+"South Africa",2017,7476
+"South Africa",2018,7434
+"South Africa",2019,7346
+"Italy",1980,24476
+"Italy",1981,24653
+"Italy",1982,24736
+"Italy",1983,25016
+"Italy",1984,25818
+"Italy",1985,26532
+"Italy",1986,27290
+"Italy",1987,28158
+"Italy",1988,29325
+"Italy",1989,30296
+"Italy",1990,30871
+"Italy",1991,31325
+"Italy",1992,31564
+"Italy",1993,31276
+"Italy",1994,31942
+"Italy",1995,32864
+"Italy",1996,33271
+"Italy",1997,33862
+"Italy",1998,34465
+"Italy",1999,35020
+"Italy",2000,36329
+"Italy",2001,37017
+"Italy",2002,37056
+"Italy",2003,36943
+"Italy",2004,37227
+"Italy",2005,37348
+"Italy",2006,37902
+"Italy",2007,38272
+"Italy",2008,37654
+"Italy",2009,35503
+"Italy",2010,36001
+"Italy",2011,36193
+"Italy",2012,35019
+"Italy",2013,33979
+"Italy",2014,33667
+"Italy",2015,33961
+"Italy",2016,34459
+"Italy",2017,35086
+"Italy",2018,35485
+"Italy",2019,35680
+"Korea, Rep.",1980,3679
+"Korea, Rep.",1981,3885
+"Korea, Rep.",1982,4144
+"Korea, Rep.",1983,4630
+"Korea, Rep.",1984,5055
+"Korea, Rep.",1985,5398
+"Korea, Rep.",1986,5950
+"Korea, Rep.",1987,6641
+"Korea, Rep.",1988,7365
+"Korea, Rep.",1989,7808
+"Korea, Rep.",1990,8496
+"Korea, Rep.",1991,9319
+"Korea, Rep.",1992,9794
+"Korea, Rep.",1993,10362
+"Korea, Rep.",1994,11209
+"Korea, Rep.",1995,12163
+"Korea, Rep.",1996,12999
+"Korea, Rep.",1997,13672
+"Korea, Rep.",1998,12877
+"Korea, Rep.",1999,14252
+"Korea, Rep.",2000,15414
+"Korea, Rep.",2001,16039
+"Korea, Rep.",2002,17178
+"Korea, Rep.",2003,17627
+"Korea, Rep.",2004,18470
+"Korea, Rep.",2005,19225
+"Korea, Rep.",2006,20131
+"Korea, Rep.",2007,21191
+"Korea, Rep.",2008,21665
+"Korea, Rep.",2009,21724
+"Korea, Rep.",2010,23087
+"Korea, Rep.",2011,23755
+"Korea, Rep.",2012,24198
+"Korea, Rep.",2013,24850
+"Korea, Rep.",2014,25486
+"Korea, Rep.",2015,26064
+"Korea, Rep.",2016,26726
+"Korea, Rep.",2017,27493
+"Korea, Rep.",2018,28158
+"Korea, Rep.",2019,28675
+"China",1980,347
+"China",1981,360
+"China",1982,387
+"China",1983,423
+"China",1984,480
+"China",1985,538
+"China",1986,577
+"China",1987,634
+"China",1988,694
+"China",1989,712
+"China",1990,729
+"China",1991,786
+"China",1992,887
+"China",1993,999
+"China",1994,1116
+"China",1995,1225
+"China",1996,1332
+"China",1997,1441
+"China",1998,1539
+"China",1999,1642
+"China",2000,1768
+"China",2001,1901
+"China",2002,2061
+"China",2003,2254
+"China",2004,2467
+"China",2005,2732
+"China",2006,3063
+"China",2007,3480
+"China",2008,3797
+"China",2009,4133
+"China",2010,4550
+"China",2011,4961
+"China",2012,5325
+"China",2013,5711
+"China",2014,6104
+"China",2015,6500
+"China",2016,6908
+"China",2017,7347
+"China",2018,7807
+"China",2019,8242
