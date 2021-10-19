@@ -91,6 +91,7 @@ q <- q +   geom_text(
   aes(label = countrycode,color=Country), data = data_end,
   fontface ="bold",  size = 4)
 ppi=300
-nfile <- paste0(tdir,"/COMPARISON_GDPS.png")
-print_2_png(q,nfile,10,6)
+nfile <- paste0(tdir,"/COMPARISON_GDPS")
+print_2_png(q,paste0(nfile,".png"),10,6)
+print_2_tiff(TRUE,q,paste0(nfile,".tiff"),10,6)
 
