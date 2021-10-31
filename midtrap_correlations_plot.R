@@ -1,5 +1,4 @@
-# Script ------------
-# List lcriteria allows to choose GDP, GNI or both
+# Script to compute convergence speed correlations
 #
 # Author: Javier Garcia-Algarra
 # August 2021
@@ -8,7 +7,6 @@
 #          input_data/<countries by region for regression>.csv
 #          output_data/all_speeds_criteria.csv"
 # Results: figs/ALL_DISTANCES*.png .tiff
-
 #          output_data/KSdist_speed_criteria.csv
 
 library(reshape2)
@@ -66,8 +64,6 @@ networkdist <- function(dframe)
        vertex.frame.color="transparent")
   recordPlot() # record the latest plot
 }
-
-
 
 criteria <- read.table("config_data/criteria.txt")
 lcriteria <- criteria$V1

@@ -19,9 +19,7 @@ library(ggrepel)
 library(cowplot)
 library(patchwork)
 library(zoo)
-
-# Function to format axis labels
-scaleFUN <- function(x) sprintf("%2.1f ", x)
+source("auxiliar_plot_functions.R")
 
 # Function to generate a phase plot
 phase_plot <- function(datos,xlabel="",ylabel="",xint=NA,yint=NA,
@@ -61,23 +59,6 @@ phase_plot <- function(datos,xlabel="",ylabel="",xint=NA,yint=NA,
     pphase <- pphase + scale_y_continuous(position = "right")
   return(pphase)
 }
-
-print_2_tiff <- function(print_tiff,plot,nfile,wplot,hplot)
-{
-  if (print_tiff){
-    tiff(paste0(nfile,".tiff"), width=wplot*ppi, height=hplot*ppi,res=ppi)
-    print(plot)
-    dev.off()
-  }
-}
-
-print_2_png <- function(plot,nfile,wplot,hplot)
-{
-  png(paste0(nfile,".png"), width=wplot*ppi, height=hplot*ppi, res=ppi)
-  print(plot)
-  dev.off()
-}
-
 
 criteria <- read.table("config_data/criteria.txt")
 lcriteria <- criteria$V1
