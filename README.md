@@ -15,6 +15,8 @@ The input data file contains the following files:
 
 * `group_AFRICA/ASIA/EUROPA/LATAM.csv`. Auxiliar tables with groups os MSCI countries for plotting.
 
+Raw data downloaded from the servers may be found at the `raw_data` folder.
+
 ## Scripts
 
 You will need R 4.0.1 or later. Execute them following this order:

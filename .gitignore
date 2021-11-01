@@ -1,3 +1,5 @@
 /figs
 .Rhistory
+.RData
 midtrap_phase_mosaic.R
+README.html
