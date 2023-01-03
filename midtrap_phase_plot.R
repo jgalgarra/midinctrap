@@ -8,7 +8,7 @@
 # set print_indiv to TRUE to procude all plots
 # set print_tiff to print the ALL plot in that format
 #
-# Inputs:  input_data/GDP2010_WB.csv    GNIS.csv
+# Inputs:  input_data/GDP2015_WB.csv    GNIS.csv
 #          config_data/config_plots.csv
 #          config_data/criteria.txt
 # Results: data/all_speeds_criteria.csv
@@ -89,7 +89,7 @@ USA_perc_middle_GDP <- 0.5
 minaccel_GDP <- 0
 minaccel_GNI <- -0.25
 mmovper <- 5
-last_year_Ecihengreen <- 2013
+last_year_Ecihengreen <- final_year-6
 mingb_GDP <- 3.5
 mindif_GDP <- -2
 minMagnitude_GDP <- 10000
@@ -135,7 +135,7 @@ for (criteria in lcriteria)
     if (criteria == "GNI"){
       DATA_WB <- read.csv("input_data/GNIS.csv")
     } else
-      DATA_WB <- read.delim2("input_data/GDP2010_WB.csv")
+      DATA_WB <- read.delim2("input_data/GDP2015_WB.csv")
     rawdata <- DATA_WB[DATA_WB$Country.Code==countrycode,]
     usadata <- DATA_WB[DATA_WB$Country.Name=="United States",]
     country <- DATA_WB[DATA_WB$Country.Code==countrycode,]$Country.Name
