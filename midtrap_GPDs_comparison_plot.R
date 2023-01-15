@@ -4,7 +4,7 @@
 # October 2021
 # 
 
-# Inputs:  input_data/GDP2010_WB.csv
+# Inputs:  input_data/GDP2015_WB.csv
 # Results: figs/COMPARISON_GDPS.png
 #          output_data/data_comparison_GDP.csv
 
@@ -18,7 +18,7 @@ source("auxiliar_plot_functions.R")
 criteria <- "GDP"
 
 initial_year <- 1980
-final_year <- 2020
+final_year <- 2021
 
 lcountrycode <- c("ESP","ITA","BRA","ZAF","ITA","KOR","CHN")
 
@@ -35,14 +35,14 @@ ncount <- 0
 
 for (countrycode in lcountrycode)
   {
-    DATA_WB <- read.delim2("input_data/GDP2010_WB.csv")
+    DATA_WB <- read.delim2("input_data/GDP2015_WB.csv")
     rawdata <- DATA_WB[DATA_WB$Country.Code==countrycode,]
     country <- DATA_WB[DATA_WB$Country.Code==countrycode,]$Country.Name
-    datos_pais <- data.frame("Year"=seq(initial_year,final_year-1))
+    datos_pais <- data.frame("Year"=seq(initial_year,final_year))
     datos_pais$Magnitude = 0
-    for (i in initial_year:final_year){
-      datos_pais$Magnitude[i-(initial_year)] <- as.numeric(rawdata[,24+i-initial_year])
-    }
+    initrawcol <- which(names(rawdata)==paste0("X",initial_year))
+    for (i in initial_year:final_year)
+      datos_pais$Magnitude[1+i-(initial_year)] <- as.numeric(rawdata[initrawcol+i-initial_year])
     datos_pais$Country=country
     datos_pais$countrycode=countrycode
     if (ncount == 0)
@@ -51,12 +51,12 @@ for (countrycode in lcountrycode)
       datos_all <- rbind(datos_all,datos_pais)
     ncount <- ncount + 1
 }
-data_comp = data.frame("Country"=datos_all$Country,"Year"=datos_all$Year,"GDP_PPP_USD2010"=round(datos_all$Magnitude))
+data_comp = data.frame("Country"=datos_all$Country,"Year"=datos_all$Year,"GDP_PPP_USD2015"=round(datos_all$Magnitude))
 write.csv(data_comp,paste0("output_data/data_comparison_GDP.csv"),row.names = FALSE)
 q <- ggplot(datos_all,aes(x=Year,y=Magnitude,color=Country),size=2)+geom_line(alpha=0.5)+
      geom_point(size=1)+
-     ylab("GDP per capita (PPP constant 2010 US$)\n")+
-     xlim(c(initial_year,final_year-1))+ylim(0,40000)+
+     ylab("GDP per capita (PPP constant 2015 US$)\n")+
+     xlim(c(initial_year,final_year+2))+ylim(0,40000)+
      coord_cartesian( expand = FALSE )+theme_bw()+
      theme(panel.border = element_blank(),
            legend.position = "none",
@@ -72,6 +72,6 @@ q <- q +   geom_text(
   fontface ="bold",  size = 4)
 ppi=300
 nfile <- paste0(tdir,"/COMPARISON_GDPS")
-print_2_png(q,paste0(nfile,".png"),10,6)
-print_2_tiff(TRUE,q,paste0(nfile,".tiff"),10,6)
+print_2_png(q,nfile,10,6)
+print_2_tiff(TRUE,q,nfile,10,6)
 

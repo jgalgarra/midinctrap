@@ -1,2 +1,2 @@
-CountryCode;SecondCountryCode;LabelsInitialPair;print_indiv;print_tiff;initial_year;final_year
-ZAF;TUR;A;TRUE;FALSE;1960;2020
+CountryCode;SecondCountryCode;Magnitude;LabelsInitialPair;print_indiv;print_tiff;initial_year;final_year
+NGA;ISL;GDP;A;TRUE;FALSE;1960;2022
