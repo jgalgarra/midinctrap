@@ -7,6 +7,7 @@
 # Inputs:  input_data/countries_msci.csv
 #          input_data/<countries by region for regression>.csv
 #          output_data/all_speeds_criteria.csv"
+#          config_data/config_plots.csv
 # Results: figs/ALL_DISTANCES*.png .tiff
 
 
@@ -16,15 +17,15 @@ library(cowplot)
 library(factoextra)
 library(Rcpp)
 
-criteria <- read.table("config_data/criteria.txt")
-lcriteria <- criteria$V1
+configuration_file <- read.table("config_data/config_plots.csv", sep=";", header=TRUE)
+lcriteria <- configuration_file$Magnitude
 
 tdir <- "figs"
 if (!dir.exists(tdir))
   dir.create(tdir)
 
-start_year <- 1980
-end_year <- 2008
+start_year <- 1981
+end_year <- 2020
 
 countries_msci <- read.csv("input_data/countries_msci.csv")
 group_ASIA <- read.csv(paste0("input_data/group_ASIA.csv"))

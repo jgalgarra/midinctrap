@@ -10,7 +10,7 @@ for (i in firstyearcol:ncol(rawGDP)){
 }
 write.table(rawGDP,"input_data/GDP2015_WB.csv",na = "",sep="\t",row.names = FALSE)
 
-rawGNI <- read_csv("raw_data/API_NY.GNP.MKTP.CD_DS2_en_csv_v2_4772626_GNI.csv", skip = 4)
+rawGNI <- read_csv("raw_data/API_NY.GNP.PCAP.CD_DS2_en_csv_v2_4771162_GNIAtlas.csv", skip = 4)
 rawGNI <- rawGNI[,1:(ncol(rawGNI)-1)]
 names(rawGNI)[firstyearcol:ncol(rawGNI)] <- as.integer(names(rawGNI)[firstyearcol:ncol(rawGNI)])
 rawGNI <- as.data.frame(rawGNI)

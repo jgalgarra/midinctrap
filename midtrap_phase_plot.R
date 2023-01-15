@@ -10,7 +10,6 @@
 #
 # Inputs:  input_data/GDP2015_WB.csv    GNIS.csv
 #          config_data/config_plots.csv
-#          config_data/criteria.txt
 # Results: data/all_speeds_criteria.csv
 #          figs/countries
 
@@ -29,12 +28,12 @@ phase_plot <- function(datos,xlabel="",ylabel="",xint=NA,yint=NA,
     geom_path(
       aes(y = Y, x = X, colour=Magnitude),alpha=0.4,size = 0.6,
       arrow = arrow(length = unit(0.2, "cm"),type="closed"))+
-    geom_point(aes(y = Y, x = X, colour=Magnitude), size = 2.5,
-               alpha=0.8) +
-    geom_point(data=datos[1,],aes(y = Y, x = X, colour=Magnitude), size = 3,
-               alpha=1,shape=23, stroke=1) +
-    geom_point(data=datos[nrow(datos),],aes(y = Y, x = X, colour=Magnitude), size = 3,
-               alpha=1,shape=23, stroke=1) +
+    # geom_point(aes(y = Y, x = X, colour=Magnitude), size = 2.5,
+    #            alpha=0.8) +
+    # geom_point(data=datos[1,],aes(y = Y, x = X, colour=Magnitude), size = 3,
+    #            alpha=1,shape=23, stroke=1) +
+    # geom_point(data=datos[nrow(datos),],aes(y = Y, x = X, colour=Magnitude), size = 3,
+    #            alpha=1,shape=23, stroke=1) +
     scale_color_gradientn(name=criteria,colours=c("violet","blue","green","orange","red"),trans="log",
                           breaks = mbreaks, labels = mbreaks,limits=c(100,100000))+
     geom_text_repel(data=subset(datos,(Year%%4 == 0) | (Year==max(Year)) | (Year==min(Year))),
@@ -60,14 +59,12 @@ phase_plot <- function(datos,xlabel="",ylabel="",xint=NA,yint=NA,
   return(pphase)
 }
 
-criteria <- read.table("config_data/criteria.txt")
-lcriteria <- criteria$V1
-
 configuration_file <- read.table("config_data/config_plots.csv", sep=";", header=TRUE)
 print_indiv <- configuration_file$print_indiv      # Print individual files
 print_tiff <- configuration_file$print_tiff        # Produce tiff files. Be careful, each tiff file weights 24 MB!
 initial_year <- configuration_file$initial_year
 final_year <- configuration_file$final_year
+lcriteria <- configuration_file$Magnitude
 labelspair <- c("A","B")                           # Default value for side by side plots
 if (configuration_file$LabelsInitialPair=="C")
   labelspair = c("C","D")
@@ -92,7 +89,7 @@ mmovper <- 5
 last_year_Ecihengreen <- final_year-6
 mingb_GDP <- 3.5
 mindif_GDP <- -2
-minMagnitude_GDP <- 10000
+minMagnitude_GDP <- 12000 # in USD2015 equivalent to USD2010 10000
 mingb_GNI <- 3.5
 mindif_GNI <- -2
 minMagnitude_GNI <- 10000

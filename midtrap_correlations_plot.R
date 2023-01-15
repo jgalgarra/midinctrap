@@ -65,15 +65,15 @@ networkdist <- function(dframe)
   recordPlot() # record the latest plot
 }
 
-criteria <- read.table("config_data/criteria.txt")
-lcriteria <- criteria$V1
+configuration_file <- read.table("config_data/config_plots.csv", sep=";", header=TRUE)
+lcriteria <- configuration_file$Magnitude
 
 tdir <- "figs"
 if (!dir.exists(tdir))
   dir.create(tdir)
 
-lstart_year <- c(1980,2000)
-end_year <- 2019
+lstart_year <- c(1981,2001)
+end_year <- 2020
 countries_msci <- read.csv("input_data/countries_msci.csv")
 group_ASIA <- read.csv(paste0("input_data/group_ASIA.csv"))
 group_LATAM <- read.csv(paste0("input_data/group_LATAM.csv"))
@@ -93,36 +93,36 @@ for (criteria in lcriteria)
   {
     for (magnitud in lmagnitud)
     {
-        print(magnitud)
-        
-        datos_all <- datos_all[(datos_all$Year>=start_year) & (datos_all$Year<=end_year),]
+      print(magnitud)
       
-        lp <- unique(datos_all$CountryCode)
-        np <- 1
-        datadist <- data.frame("Country"=c(),"CountryCode"=c(),"Region"=c(),"MSCI Category" = c(),"distX"=c(),"distY"=c())
-        for (k in lp){
-          clean_data <- datos_all[(datos_all$CountryCode == k) & !is.na(datos_all$ratio) & 
+      datos_all <- datos_all[(datos_all$Year>=start_year) & (datos_all$Year<=end_year),]
+      
+      lp <- unique(datos_all$CountryCode)
+      np <- 1
+      datadist <- data.frame("Country"=c(),"CountryCode"=c(),"Region"=c(),"MSCI Category" = c(),"distX"=c(),"distY"=c())
+      for (k in lp){
+        clean_data <- datos_all[(datos_all$CountryCode == k) & !is.na(datos_all$ratio) & 
                                   !is.na(datos_all$dratio_dt_mmov),]
-          datosx <- datos_all[(datos_all$CountryCode == k) & !is.na(datos_all$dratio_dt_mmov),]$dratio_dt_mmov
-          datosy <- datos_all[(datos_all$Country == k) & !is.na(datos_all$dratio_dt_mmov),]$dratio_dt_mmov
-          datos_MSCI <- countries_msci[countries_msci$ISOCode == k,]
-          if ((length(datosx)==end_year-start_year+1) ){
-            if ((onlyMSCI) & (datos_MSCI$Category != "None")){
+        datosx <- datos_all[(datos_all$CountryCode == k) & !is.na(datos_all$dratio_dt_mmov),]$dratio_dt_mmov
+        datosy <- datos_all[(datos_all$Country == k) & !is.na(datos_all$dratio_dt_mmov),]$dratio_dt_mmov
+        datos_MSCI <- countries_msci[countries_msci$ISOCode == k,]
+        if ((length(datosx)==end_year-start_year+1) ){
+          if ((onlyMSCI) & (datos_MSCI$Category != "None")){
             datadist <- rbind(datadist,data.frame("Country"=k,"CountryCode"= clean_data$CountryCode[1],"Region"=datos_MSCI$Region,
                                                   "MSCI Category"= datos_MSCI$Category, "distX"=mean(clean_data$dratio_dt_mmov),
-                                                 "distY"=mean(clean_data$ddratio_dt_mmov_dt_mmov)))
+                                                  "distY"=mean(clean_data$ddratio_dt_mmov_dt_mmov)))
             if (np == 1)
               datosseries <- clean_data
             else
               datosseries <- rbind(datosseries,clean_data)
             np <- np + 1
-            }
-          } 
-          else
-            if ((onlyMSCI) & (datos_MSCI$Category != "None"))
-              print(paste("Excluded",k))
-        }
-         
+          }
+        } 
+        else
+          if ((onlyMSCI) & (datos_MSCI$Category != "None"))
+            print(paste("Excluded",k))
+      }
+      
       namesp <- unique(datosseries$CountryCode)
       ncolumns <- length(namesp)
       nullcol <- rep(0,end_year-start_year+1)
@@ -136,12 +136,12 @@ for (criteria in lcriteria)
       for (k in 1:ncolumns){
         print(names(datosframe)[k])
         if (magnitud == "ratio"){
-        if (length(datosseries[datosseries$CountryCode==names(datosframe)[k],]$dratio_dt_mmov)==length(datosframe[,k]))
-           datosframe[,k] <- datosseries[datosseries$CountryCode==names(datosframe)[k],]$dratio_dt_mmov
+          if (length(datosseries[datosseries$CountryCode==names(datosframe)[k],]$dratio_dt_mmov)==length(datosframe[,k]))
+            datosframe[,k] <- datosseries[datosseries$CountryCode==names(datosframe)[k],]$dratio_dt_mmov
         }
         else{
-        if (length(datosseries[datosseries$CountryCode==names(datosframe)[k],]$ratio)==length(datosframe[,k]))
-          datosframe[,k] <- datosseries[datosseries$CountryCode==names(datosframe)[k],]$ratio
+          if (length(datosseries[datosseries$CountryCode==names(datosframe)[k],]$ratio)==length(datosframe[,k]))
+            datosframe[,k] <- datosseries[datosseries$CountryCode==names(datosframe)[k],]$ratio
         }
       }
       removecols <- c()
@@ -150,13 +150,13 @@ for (criteria in lcriteria)
           removecols <- c(removecols,k)
       if (!is.null((removecols)))
         datosframe <- datosframe[,-removecols]
-  
+      
       M<-cor(datosframe,use="complete.obs",method="spearman")
       p <- myfun(M)
       if (magnitud=="speed")
-       pspeed <- p
+        pspeed <- p
       else
-       pratio <- p
+        pratio <- p
       wplot <- 8.5
       hplot <- 8
       nfile <- paste0(tdir,"/CORRELATION_",criteria,"_",magnitud,"_",start_year,"_",end_year)
